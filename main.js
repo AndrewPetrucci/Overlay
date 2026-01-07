@@ -1,4 +1,4 @@
-const { app, BrowserWindow, ipcMain } = require('electron');
+const { app, BrowserWindow, ipcMain, globalShortcut } = require('electron');
 const path = require('path');
 const fs = require('fs');
 const TwitchClient = require('./src/twitch');
@@ -42,6 +42,13 @@ function createWindow() {
         mainWindow.setMinimumSize(WINDOW_WIDTH, WINDOW_HEIGHT);
         mainWindow.setMaximumSize(WINDOW_WIDTH, WINDOW_HEIGHT);
     });
+
+    // Register global hotkey for wheel spin (disabled - using auto-spin instead)
+    // Uncomment below to enable manual hotkey
+    // globalShortcut.register('Shift+F1', () => {
+    //     mainWindow.webContents.send('spin-wheel-hotkey');
+    //     console.log('Global Shift+F1 hotkey triggered - spinning wheel');
+    // });
 
     // Start with mouse events ignored so clicks pass through
     mainWindow.setIgnoreMouseEvents(true, { forward: true });

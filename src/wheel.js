@@ -17,6 +17,10 @@ class SpinWheel {
             '#98D8C8', '#F7DC6F', '#BB8FCE', '#85C1E2'
         ];
 
+        // Auto-spin configuration (in milliseconds: 30000 = 30 seconds)
+        this.autoSpinInterval = 30000;
+        this.autoSpinTimer = null;
+
         this.setupEventListeners();
         this.draw();
     }
@@ -49,6 +53,24 @@ class SpinWheel {
                 this.updateResult(result);
             });
         }
+
+        // Listen for global hotkey from main process (now disabled in favor of auto-spin)
+        // if (window.electron && window.electron.onSpinHotkey) {
+        //     window.electron.onSpinHotkey(() => {
+        //         console.log('Global hotkey received, spinning wheel');
+        //         this.spin();
+        //     });
+        // }
+
+        // Auto-spin timer - spins every 30 seconds
+        this.autoSpinTimer = setInterval(() => {
+            if (!this.isSpinning) {
+                console.log('[Auto-spin] Triggering wheel spin at', new Date().toLocaleTimeString());
+                this.spin();
+            }
+        }, this.autoSpinInterval);
+
+        console.log(`[Wheel] Auto-spin enabled: every ${this.autoSpinInterval / 1000} seconds`);
     }
 
     draw() {
@@ -121,12 +143,20 @@ class SpinWheel {
     }
 
     spin() {
-        if (this.isSpinning) return;
+        console.log('spin() called, isSpinning:', this.isSpinning);
+        if (this.isSpinning) {
+            console.log('Already spinning, ignoring spin request');
+            return;
+        }
 
+        console.log('Starting spin with velocity:', Math.random() * 20 + 15);
         this.isSpinning = true;
         const spinButton = document.getElementById('spinButton');
         if (spinButton) {
             spinButton.classList.add('spinning');
+            console.log('Added spinning class to button');
+        } else {
+            console.warn('Spin button not found');
         }
 
         // Random spin velocity (high number = more spins)
