@@ -1,0 +1,21 @@
+{
+    "name": "skyrim-twitch-wheel",
+    "version": "1.0.0",
+    "description": "Twitch-integrated spinning wheel overlay for Skyrim streaming",
+    "main": "main.js",
+    "homepage": "./",
+    "scripts": {
+        "start": "electron .",
+        "dev": "electron . --dev",
+        "build": "electron-builder"
+    },
+    "author": "Your Name",
+    "license": "MIT",
+    "dependencies": {
+        "tmi.js": "^1.8.5"
+    },
+    "devDependencies": {
+        "electron": "latest",
+        "electron-builder": "latest"
+    }
+}

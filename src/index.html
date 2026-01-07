@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Twitch Wheel Overlay</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+
+<body>
+    <!-- <div class="window-bar interactive-overlay-element" id="windowBar">
+        <div class="window-title">Twitch Wheel Overlay</div>
+    </div> -->
+    <div class="container">
+        <div class="wheel-container">
+            <canvas id="wheelCanvas" width="600" height="600"></canvas>
+            <button class="spin-button interactive-overlay-element" id="spinButton">SPIN</button>
+        </div>
+
+        <div class="info-panel interactive-overlay-element" id="windowBar">
+            <span id="lastResult">Waiting for spin</span>
+            <div class="button-continer">
+                <span id="chatStatus">Connecting to Twitch...</span>
+                <button class="window-btn minimize-btn" id="minimizeBtn" title="Minimize">−</button>
+                <button class="window-btn close-btn" id="closeBtn" title="Close">×</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="wheel.js"></script>
+    <script src="twitch-client.js"></script>
+    <script src="window-bar.js"></script>
+</body>
+
+</html>
