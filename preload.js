@@ -12,5 +12,15 @@ contextBridge.exposeInMainWorld('electron', {
     getConfig: () => ipcRenderer.invoke('get-config'),
     removeSpinResultListener: () => ipcRenderer.removeAllListeners('spin-result'),
     minimizeWindow: () => ipcRenderer.send('minimize-window'),
-    closeWindow: () => ipcRenderer.send('close-window')
+    closeWindow: () => ipcRenderer.send('close-window'),
+
+    // Mod Integration
+    wheelSpinResult: (result) => ipcRenderer.send('wheel-spin-result', result),
+    getMappedMods: (wheelResult) => ipcRenderer.sendSync('get-mapped-mods', wheelResult),
+    triggerModAction: (modKey, actionKey) => ipcRenderer.sendSync('trigger-mod-action', { modKey, actionKey }),
+    getAllMods: () => ipcRenderer.sendSync('get-all-mods'),
+    getModConfig: (modKey) => ipcRenderer.sendSync('get-mod-config', modKey),
+    setModEnabled: (modKey, enabled) => ipcRenderer.sendSync('set-mod-enabled', { modKey, enabled }),
+    addWheelMapping: (wheelResult, modKey) => ipcRenderer.sendSync('add-wheel-mapping', { wheelResult, modKey }),
+    removeWheelMapping: (wheelResult, modKey) => ipcRenderer.sendSync('remove-wheel-mapping', { wheelResult, modKey })
 });

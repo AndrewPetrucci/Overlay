@@ -2,9 +2,11 @@ const { app, BrowserWindow, ipcMain } = require('electron');
 const path = require('path');
 const fs = require('fs');
 const TwitchClient = require('./src/twitch');
+const ModIntegration = require('./src/mod-integration');
 
 let mainWindow;
 let twitchClient;
+let modIntegration;
 
 const WINDOW_WIDTH = 600;
 const WINDOW_HEIGHT = 600;
@@ -77,6 +79,48 @@ function createWindow() {
         mainWindow.setSize(width, height);
     });
 
+    // Mod integration handlers
+    ipcMain.on('wheel-spin-result', (event, result) => {
+        console.log('Wheel result:', result);
+        modIntegration.writeWheelResult(result);
+    });
+
+    ipcMain.on('get-mapped-mods', (event, wheelResult) => {
+        const mods = modIntegration.getMappedMods(wheelResult);
+        event.returnValue = mods;
+    });
+
+    ipcMain.on('trigger-mod-action', (event, { modKey, actionKey }) => {
+        const result = modIntegration.triggerModAction(modKey, actionKey);
+        event.returnValue = result;
+    });
+
+    ipcMain.on('get-all-mods', (event) => {
+        const mods = modIntegration.getAllMods();
+        event.returnValue = mods;
+    });
+
+    ipcMain.on('get-mod-config', (event, modKey) => {
+        const config = modIntegration.getModConfig(modKey);
+        event.returnValue = config;
+    });
+
+    ipcMain.on('set-mod-enabled', (event, { modKey, enabled }) => {
+        const result = modIntegration.setModEnabled(modKey, enabled);
+        event.returnValue = result;
+    });
+
+    ipcMain.on('add-wheel-mapping', (event, { wheelResult, modKey }) => {
+        const result = modIntegration.addWheelMapping(wheelResult, modKey);
+        event.returnValue = result;
+    });
+
+    ipcMain.on('remove-wheel-mapping', (event, { wheelResult, modKey }) => {
+        const result = modIntegration.removeWheelMapping(wheelResult, modKey);
+        event.returnValue = result;
+    });
+
+
     ipcMain.on('minimize-window', () => {
         mainWindow.minimize();
     });
@@ -97,6 +141,10 @@ function createWindow() {
 
 app.on('ready', () => {
     createWindow();
+
+    // Initialize Mod Integration
+    modIntegration = new ModIntegration();
+    console.log('Mod Integration initialized');
 
     // Initialize Twitch Client
     twitchClient = new TwitchClient();
@@ -133,12 +181,18 @@ ipcMain.on('twitch-status-request', (event) => {
 ipcMain.handle('get-config', async () => {
     let wheelOptions = [];
     try {
-        const csvPath = path.join(__dirname, 'options.csv');
-        const csvContent = fs.readFileSync(csvPath, 'utf-8');
-        wheelOptions = csvContent.split('\n').filter(line => line.trim() !== '');
+        const jsonPath = path.join(__dirname, 'wheel-options.json');
+        const jsonContent = fs.readFileSync(jsonPath, 'utf-8');
+        const data = JSON.parse(jsonContent);
+        wheelOptions = data.options.map(opt => opt.name);
     } catch (error) {
-        console.error('Failed to read options.csv:', error);
+        console.error('Failed to read wheel-options.json:', error);
         wheelOptions = [
+            'Dragons',
+            'Spiders',
+            'Fire',
+            'Ice',
+            'Lightning',
             'Teleport to random location',
             'Give random weapon',
             'Spawn enemy',

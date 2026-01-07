@@ -150,6 +150,11 @@ class SpinWheel {
         // Update UI
         this.updateResult(winner);
 
+        // Trigger mod integration
+        if (typeof modClient !== 'undefined') {
+            modClient.onWheelSpin(winner);
+        }
+
         // Send to main process
         if (window.electron) {
             window.electron.spinWheel(winner);
@@ -169,6 +174,11 @@ class SpinWheel {
 // Initialize wheel when DOM is ready
 document.addEventListener('DOMContentLoaded', async () => {
     let options = [
+        'Dragons',
+        'Spiders',
+        'Fire',
+        'Ice',
+        'Lightning',
         'Teleport to random location',
         'Give random weapon',
         'Spawn enemy',
@@ -178,6 +188,18 @@ document.addEventListener('DOMContentLoaded', async () => {
         'Blind effect',
         'Speed boost'
     ];
+
+    // Try to load options from wheel-options.json
+    try {
+        const response = await fetch('../wheel-options.json');
+        if (response.ok) {
+            const data = await response.json();
+            options = data.options.map(opt => opt.name);
+            console.log('Loaded wheel options from file:', options);
+        }
+    } catch (error) {
+        console.warn('Could not load wheel options from file, using defaults');
+    }
 
     if (window.electron) {
         const config = await window.electron.getConfig();
