@@ -27,16 +27,43 @@ Wheel Spin → Python Executor → Command Queue File → Controller → Game Ac
 ## Available Controllers
 
 ### AutoHotkey (Windows)
-- **Location**: `controllers/autohotkey/skyrim-executor.ahk`
-- **Requirements**: AutoHotkey v1.1
-- **How it works**:
+- **Location**: `controllers/autohotkey/skyrim-executor.ahk` (Skyrim), `controllers/autohotkey/notepad-executor.ahk` (Notepad)
+- **Requirements**: AutoHotkey v2.0+
+- **Installation**:
+  1. Download and install [AutoHotkey v2.0+](https://www.autohotkey.com/download/)
+  2. Run the installer with default settings (installs to `C:\Program Files\AutoHotkey\v2\`)
+  3. AutoHotkey will be automatically available in your PATH
+  4. Verify installation by running `AutoHotkey.exe --version` in PowerShell
+  5. The scripts can now be executed directly via `AutoHotkey.exe script-name.ahk`
+
+- **How it works (Skyrim)**:
   1. Monitors `overlay-commands.txt`
   2. Activates Skyrim window
   3. Opens console with ` (backtick) key
   4. Types command and presses Enter
   5. Closes console with Escape
-- **Advantages**: No compilation needed, quick testing, works immediately
-- **Limitations**: Windows only, keyboard simulation can be unreliable with input lag
+
+- **How it works (Notepad)**:
+  1. Detects wheel spin result
+  2. Focuses Notepad window
+  3. Types the command text
+  4. Sends Enter key
+
+- **Advantages**: 
+  - No compilation needed, quick testing, works immediately
+  - Works with any Windows application
+  - Can be modified on-the-fly without recompiling
+
+- **Limitations**: 
+  - Windows only
+  - Keyboard simulation can be unreliable with input lag
+  - Requires the target window to be active/responsive
+
+- **Troubleshooting**:
+  - If scripts don't execute, ensure AutoHotkey v2.0+ is installed
+  - Add AutoHotkey to PATH: `[Environment]::SetEnvironmentVariable("PATH", "$env:PATH;C:\Program Files\AutoHotkey\v2", "User")`
+  - Check that target application window is responding
+  - Increase sleep delays in .ahk scripts if timing issues occur
 
 ### SKSE Plugin (Stub)
 - **Location**: `controllers/skse/`

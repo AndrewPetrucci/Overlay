@@ -269,8 +269,9 @@ app.on('ready', () => {
         console.warn(`[Main] Failed to save mapping files: ${error.message}`);
     }
 
-    // Initialize Mod Integration
-    modIntegration = new ModIntegration('mod-config.json', appToControllersLog, controllerToAppsLog);
+    // Initialize Mod Integration with current application
+    const currentApp = Array.from(uniqueApplications)[0] || null;
+    modIntegration = new ModIntegration('mod-config.json', appToControllersLog, controllerToAppsLog, currentApp);
     console.log('Mod Integration initialized');
 
     // Initialize Twitch Client (optional - skip if credentials missing)

@@ -1,5 +1,9 @@
 {
     "dataPath": "%USERPROFILE%\\Documents\\My Games\\Skyrim Special Edition\\SKSE\\Plugins\\overlay-data.json",
+    "applicationDataPaths": {
+        "notepad": "%USERPROFILE%\\Documents\\Overlay\\overlay-data.json",
+        "skyrim": "%USERPROFILE%\\Documents\\My Games\\Skyrim Special Edition\\SKSE\\Plugins\\overlay-data.json"
+    },
     "mods": {},
     "wheelMappings": {}
 }

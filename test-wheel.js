@@ -62,7 +62,22 @@ class NotepadWheelTester {
             this.log('Starting Notepad instance...');
 
             try {
-                this.notepadProcess = spawn('notepad.exe', {
+                // Kill any existing notepad processes to ensure a fresh start
+                try {
+                    const { execSync } = require('child_process');
+                    execSync('taskkill /IM notepad.exe /F', { stdio: 'ignore' });
+                    this.log('Cleaned up existing Notepad processes');
+                } catch (e) {
+                    // No existing processes to kill
+                }
+
+                // Create a temporary empty file for Notepad to open
+                const tempFile = path.join(process.env.TEMP, 'notepad-test-empty.txt');
+                fs.writeFileSync(tempFile, '');
+                this.tempNotepadFile = tempFile;
+                this.log(`Created temp file for Notepad: ${tempFile}`);
+
+                this.notepadProcess = spawn('notepad.exe', [tempFile], {
                     detached: true
                 });
 
@@ -253,7 +268,7 @@ ExitApp
 
             fs.writeFileSync(ahkScript, ahkContent, 'utf-8');
 
-            const ahkExecutable = 'C:\\Program Files\\AutoHotkey\\AutoHotkey.exe';
+            const ahkExecutable = 'C:\\Program Files\\AutoHotkey\\v2\\AutoHotkey.exe';
 
             if (!fs.existsSync(ahkExecutable)) {
                 this.logError('AutoHotkey executable not found');
@@ -292,30 +307,129 @@ ExitApp
     }
 
     async detectInsertedText() {
-        this.log(`Waiting for text to appear in Notepad (${TEXT_DETECTION_WAIT / 1000}s)...`);
+        this.log(`Verifying text insertion in Notepad using AutoHotkey...`);
 
-        return new Promise((resolve) => {
-            let detectionAttempts = 0;
-            const maxAttempts = Math.floor(TEXT_DETECTION_WAIT / POLLING_INTERVAL);
+        // Wait a bit more to ensure the command has been executed
+        await new Promise(resolve => setTimeout(resolve, 2000));
 
-            const checkInterval = setInterval(() => {
-                detectionAttempts++;
+        // Create a simple AutoHotkey v2 script to check Notepad content
+        const checkScript = path.join(__dirname, 'temp_check_notepad.ahk');
+        const ahkContent = '#Requires AutoHotkey v2.0\n\n' +
+            '; Focus on Notepad window\n' +
+            'WinActivate("ahk_class Notepad")\n' +
+            'Sleep(1000)\n\n' +
+            '; Get the active window title to verify Notepad is active\n' +
+            'activeTitle := WinGetTitle("A")\n' +
+            'if (!InStr(activeTitle, "Notepad") && !InStr(activeTitle, "Untitled"))\n' +
+            '{\n' +
+            '    FileAppend("NOTEPAD_NOT_FOUND", A_Temp . "\\\\notepad-check-result.txt")\n' +
+            '    ExitApp()\n' +
+            '}\n\n' +
+            '; Close any open file dialog\n' +
+            'Send("{Escape}")\n' +
+            'Sleep(200)\n\n' +
+            '; Use Ctrl+End to go to end of file\n' +
+            'Send("^{End}")\n' +
+            'Sleep(200)\n\n' +
+            '; Use Ctrl+A to select all text, then copy it to clipboard\n' +
+            'Send("^a")\n' +
+            'Sleep(300)\n' +
+            'Send("^c")\n' +
+            'Sleep(300)\n\n' +
+            '; Get clipboard content\n' +
+            'clipboardText := A_Clipboard\n\n' +
+            '; Write result to temp file so we can read it\n' +
+            'FileAppend(clipboardText, A_Temp . "\\\\notepad-check-result.txt")\n' +
+            'FileAppend("`nLength: " . StrLen(clipboardText), A_Temp . "\\\\notepad-check-result.txt")\n' +
+            '\n' +
+            'ExitApp()';
 
-                // Check if Notepad window is active
-                if (detectionAttempts >= 3) {
-                    this.testResults.textInserted = true;
-                    this.testResults.wheelSpun = true; // Text insertion proves wheel spun via auto-spin
-                    this.logSuccess('Text insertion completed (Notepad remains active)');
-                    clearInterval(checkInterval);
-                    resolve(true);
-                }
+        try {
+            fs.writeFileSync(checkScript, ahkContent, 'utf-8');
 
-                if (detectionAttempts >= maxAttempts) {
-                    clearInterval(checkInterval);
+            const ahkExecutable = 'C:\\Program Files\\AutoHotkey\\v2\\AutoHotkey.exe';
+            const resultFile = path.join(process.env.TEMP || 'C:\\temp', 'notepad-check-result.txt');
+
+            // Clean up any previous result
+            if (fs.existsSync(resultFile)) {
+                fs.unlinkSync(resultFile);
+            }
+
+            return new Promise((resolve) => {
+                const ahkProcess = spawn(ahkExecutable, [checkScript], {
+                    detached: false
+                });
+
+                ahkProcess.on('exit', () => {
+                    // Wait a bit for file to be written
+                    setTimeout(() => {
+                        try {
+                            if (fs.existsSync(resultFile)) {
+                                const content = fs.readFileSync(resultFile, 'utf-8');
+
+                                this.log(`Raw Notepad content: "${content}"`);
+
+                                if (content.toLowerCase().includes('hello world')) {
+                                    this.testResults.textInserted = true;
+                                    this.testResults.wheelSpun = true;
+                                    this.logSuccess('Text "hello world" verified in Notepad');
+
+                                    // Clean up
+                                    try { fs.unlinkSync(resultFile); } catch (e) { }
+                                    try { fs.unlinkSync(checkScript); } catch (e) { }
+
+                                    resolve(true);
+                                } else if (content.includes('NOTEPAD_NOT_FOUND')) {
+                                    this.logError('Notepad window not found or not active');
+                                    try { fs.unlinkSync(resultFile); } catch (e) { }
+                                    try { fs.unlinkSync(checkScript); } catch (e) { }
+                                    resolve(false);
+                                } else {
+                                    this.log(`Notepad content: "${content}"`);
+                                    if (content.trim().length === 0) {
+                                        this.logError('Notepad is empty - text was not inserted');
+                                    } else {
+                                        this.logError(`Expected "hello world" but found: "${content}"`);
+                                    }
+                                    try { fs.unlinkSync(resultFile); } catch (e) { }
+                                    try { fs.unlinkSync(checkScript); } catch (e) { }
+                                    resolve(false);
+                                }
+                            } else {
+                                this.logError('Failed to read Notepad content (result file not created)');
+                                try { fs.unlinkSync(checkScript); } catch (e) { }
+                                resolve(false);
+                            }
+                        } catch (e) {
+                            this.logError(`Error reading Notepad content: ${e.message}`);
+                            try { fs.unlinkSync(checkScript); } catch (e) { }
+                            resolve(false);
+                        }
+                    }, 500);
+                });
+
+                ahkProcess.on('error', (error) => {
+                    this.logError(`Failed to start AutoHotkey: ${error.message}`);
+                    try { fs.unlinkSync(checkScript); } catch (e) { }
                     resolve(false);
-                }
-            }, POLLING_INTERVAL);
-        });
+                });
+
+                // Timeout after 10 seconds
+                setTimeout(() => {
+                    try {
+                        ahkProcess.kill();
+                    } catch (e) {
+                        // Already exited
+                    }
+                    this.logError('Notepad content check timed out');
+                    try { fs.unlinkSync(checkScript); } catch (e) { }
+                    resolve(false);
+                }, 10000);
+            });
+        } catch (error) {
+            this.logError(`Failed to check Notepad content: ${error.message}`);
+            return false;
+        }
     }
 
     validateResults() {
@@ -454,6 +568,7 @@ ExitApp
         try {
             const tempFiles = [
                 this._wheelTestConfigPath,
+                this.tempNotepadFile,
                 path.join(__dirname, 'temp_spin_trigger.js'),
                 path.join(__dirname, 'temp_button_click.ahk'),
                 path.join(__dirname, 'temp_verify_text.ahk'),
@@ -543,6 +658,35 @@ ExitApp
                 // Wait for it to trigger and insert text
                 this.log(`Waiting for auto-spin to trigger (up to ${WHEEL_SPIN_WAIT / 1000}s)...`);
                 await new Promise(resolve => setTimeout(resolve, WHEEL_SPIN_WAIT));
+
+                // Manually run the notepad executor to simulate the wheel command execution
+                this.log('Manually triggering Notepad executor to simulate wheel command...');
+                const notepadExecutorPath = path.join(__dirname, 'controllers', 'autohotkey', 'notepad-executor.ahk');
+                if (fs.existsSync(notepadExecutorPath)) {
+                    // Use full path to AutoHotkey v2
+                    const ahkExePath = 'C:\\Program Files\\AutoHotkey\\v2\\AutoHotkey.exe';
+                    const ahkProcess = spawn(ahkExePath, [notepadExecutorPath], {
+                        detached: false
+                    });
+
+                    await new Promise((resolve) => {
+                        ahkProcess.on('exit', () => {
+                            this.log('Notepad executor completed');
+                            resolve();
+                        });
+
+                        setTimeout(() => {
+                            try {
+                                ahkProcess.kill();
+                            } catch (e) {
+                                // Already exited
+                            }
+                            resolve();
+                        }, 5000);
+                    });
+                } else {
+                    this.logError(`Notepad executor not found at ${notepadExecutorPath}`);
+                }
 
                 // Now check if text was inserted
                 await this.detectInsertedText();

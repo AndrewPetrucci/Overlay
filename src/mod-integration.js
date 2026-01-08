@@ -112,15 +112,35 @@ class ModRegistry {
 }
 
 class ModIntegration {
-    constructor(configPath = 'mod-config.json', appToControllers = {}, controllerToApps = {}) {
+    constructor(configPath = 'mod-config.json', appToControllers = {}, controllerToApps = {}, currentApp = null) {
         this.registry = new ModRegistry();
         this.config = this.loadConfig(configPath);
-        this.dataPath = this.expandPath(this.config.dataPath);
+        this.currentApp = currentApp;
+        this.setDataPath();
         this.appToControllers = appToControllers;
         this.controllerToApps = controllerToApps;
         this.ensureDataDirectory();
         this.registerMods();
         this.logMappings();
+    }
+
+    setDataPath() {
+        // Use application-specific data path if available
+        if (this.currentApp && this.config.applicationDataPaths && this.config.applicationDataPaths[this.currentApp]) {
+            this.dataPath = this.expandPath(this.config.applicationDataPaths[this.currentApp]);
+            console.log(`[ModIntegration] Using application-specific data path for ${this.currentApp}: ${this.dataPath}`);
+        } else {
+            // Fall back to default data path
+            this.dataPath = this.expandPath(this.config.dataPath);
+            if (this.currentApp) {
+                console.log(`[ModIntegration] No application-specific path for ${this.currentApp}, using default: ${this.dataPath}`);
+            }
+        }
+    }
+
+    setCurrentApplication(appName) {
+        this.currentApp = appName;
+        this.setDataPath();
     }
 
     logMappings() {
