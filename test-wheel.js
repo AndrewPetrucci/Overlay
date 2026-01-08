@@ -711,15 +711,15 @@ ExitApp
                 const helloWorldOption = this.wheelOptions.find(opt => opt.name === 'Hello World');
                 if (helloWorldOption && helloWorldOption.config) {
                     this.log('Manually triggering Notepad executor with Hello World config...');
-                    const notepadExecutorPath = path.join(__dirname, 'controllers', 'autohotkey', 'notepad-executor.ahk');
+                    const notepadExecutorPath = path.join(__dirname, 'controllers', 'autohotkey', 'executor.ahk');
 
                     if (fs.existsSync(notepadExecutorPath)) {
                         const configJson = JSON.stringify(helloWorldOption.config);
 
-                        this.log(`Executing notepad-executor.ahk with config: ${configJson}`);
-
-                        // Use full path to AutoHotkey v2
-                        const ahkExePath = 'C:\\Program Files\\AutoHotkey\\v2\\AutoHotkey.exe';
+                        this.log(`Executing executor.ahk with config: ${configJson}`);
+                        
+                        // Use AutoHotkey from PATH (since we added it to PATH)
+                        const ahkExePath = 'AutoHotkey.exe';
                         const ahkProcess = spawn(ahkExePath, [notepadExecutorPath, configJson], {
                             detached: false
                         });

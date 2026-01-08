@@ -4,9 +4,9 @@
 ; Executes keyboard commands in the Notepad window
 ;
 ; USAGE:
-; notepad-executor.ahk <config-json>
+; executor.ahk <config-json>
 ; Example:
-;   notepad-executor.ahk '{"action":"insert_text","value":"hello world"}'
+;   executor.ahk '{"action":"insert_text","value":"hello world"}'
 ;
 ; PARAMETERS:
 ; A_Args[1] = config as JSON string (e.g., {"action":"send_keys","value":"^s"})

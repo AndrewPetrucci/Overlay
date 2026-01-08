@@ -342,8 +342,8 @@ ipcMain.on('spin-wheel', (event, wheelResult) => {
             const application = wheelResult.application || 'Notepad';
 
             if (application === 'Notepad') {
-                // Execute notepad-executor.ahk with entire config object as JSON
-                const ahkScript = path.join(__dirname, 'controllers', 'autohotkey', 'notepad-executor.ahk');
+                // Execute executor.ahk with entire config object as JSON
+                const ahkScript = path.join(__dirname, 'controllers', 'autohotkey', 'executor.ahk');
                 const configJson = JSON.stringify(wheelResult.config);
                 console.log(`Executing: ${ahkScript} with config: ${configJson}`);
 
