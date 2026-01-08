@@ -717,7 +717,7 @@ ExitApp
                         const configJson = JSON.stringify(helloWorldOption.config);
 
                         this.log(`Executing executor.ahk with config: ${configJson}`);
-                        
+
                         // Use AutoHotkey from PATH (since we added it to PATH)
                         const ahkExePath = 'AutoHotkey.exe';
                         const ahkProcess = spawn(ahkExePath, [notepadExecutorPath, configJson], {
