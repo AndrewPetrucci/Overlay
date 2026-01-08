@@ -7,10 +7,11 @@
     "scripts": {
         "start": "electron .",
         "dev": "electron . --dev",
-        "start:no-spin": "cross-env AUTO_SPIN=false npm start",
+        "start:spin": "cross-env AUTO_SPIN=true npm start",
         "build": "electron-builder",
-        "pretest": "start npm run start:no-spin",
-        "test": "node test-wheel.js"
+        "pretest": "start npm start",
+        "test": "node test-wheel.js",
+        "test:render": "node test-wheel-playwright.js"
     },
     "author": "Your Name",
     "license": "MIT",
@@ -20,6 +21,7 @@
     "devDependencies": {
         "cross-env": "^10.1.0",
         "electron": "latest",
-        "electron-builder": "latest"
+        "electron-builder": "latest",
+        "playwright": "^1.57.0"
     }
 }

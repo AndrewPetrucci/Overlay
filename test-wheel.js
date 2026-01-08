@@ -386,7 +386,9 @@ ExitApp
             const tempFiles = [
                 this._wheelTestConfigPath,
                 path.join(__dirname, 'temp_spin_trigger.js'),
-                path.join(__dirname, 'temp_button_click.ahk')
+                path.join(__dirname, 'temp_button_click.ahk'),
+                path.join(__dirname, 'temp_verify_text.ahk'),
+                path.join(__dirname, 'notepad_content.txt')
             ].filter(file => file); // Filter out undefined values
 
             tempFiles.forEach(file => {

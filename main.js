@@ -12,9 +12,9 @@ let modIntegration;
 let gameConfig;
 let applicationConfigs = {};
 
-// Get auto-spin setting from environment (default: true)
-// Set AUTO_SPIN=false or --disable-auto-spin to disable
-const AUTO_SPIN = process.env.AUTO_SPIN !== 'false' && !process.argv.includes('--disable-auto-spin');
+// Get auto-spin setting from environment (default: false)
+// Set AUTO_SPIN=true to enable
+const AUTO_SPIN = process.env.AUTO_SPIN === 'true' || process.argv.includes('--enable-auto-spin');
 
 const WINDOW_WIDTH = 600;
 const WINDOW_HEIGHT = 600;
@@ -332,11 +332,18 @@ app.on('activate', () => {
 
 // IPC Handlers
 ipcMain.on('spin-wheel', (event, wheelResult) => {
-    console.log('Wheel spun! Result:', wheelResult);
+    try {
+        console.log('Wheel spun! Result:', wheelResult);
 
-    // TODO: Send to Skyrim mod via HTTP or file I/O
-    // For now, just broadcast back to renderer
-    mainWindow.webContents.send('spin-result', wheelResult);
+        // TODO: Send to Skyrim mod via HTTP or file I/O
+        // For now, just broadcast back to renderer
+        if (mainWindow && mainWindow.webContents) {
+            mainWindow.webContents.send('spin-result', wheelResult);
+        }
+    } catch (error) {
+        // Silently handle errors (e.g., broken pipe, closed window)
+        // Don't crash the process
+    }
 });
 
 ipcMain.on('twitch-status-request', (event) => {
