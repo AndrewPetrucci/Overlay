@@ -5,3 +5,5 @@ dist/
 build/
 .env
 .vscode/settings.json
+tmp/test-screenshots/
+tmp/test-text/

@@ -271,7 +271,7 @@ class WheelRenderingTest {
                 this.logSuccess(`Screenshot saved: ${screenshotPath}`);
 
                 // Also save as reference initial state on first run
-                const referenceImagePath = path.join(screenshotDir, 'reference-initial-state.png');
+                const referenceImagePath = path.join(__dirname, 'test', 'reference-initial-state.png');
                 if (!fs.existsSync(referenceImagePath)) {
                     fs.copyFileSync(screenshotPath, referenceImagePath);
                     this.logSuccess(`Reference initial state image created: ${referenceImagePath}`);

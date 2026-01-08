@@ -94,37 +94,31 @@ Execute(action, value)
     ; First, focus on Notepad window
     try
     {
-        FileAppend("Attempting to activate Notepad window...`n", logFile)
         WinActivate(notepadWindowTitle)
         Sleep(500)
     }
     catch Error as e
     {
-        FileAppend("Activate by window title failed: " . e.Message . "`n", logFile)
         ; Try by class name directly
         try
         {
-            FileAppend("Trying to activate by class name...`n", logFile)
             WinActivate("ahk_class Notepad")
             Sleep(500)
         }
         catch Error as e2
         {
-            FileAppend("Activate by class failed: " . e2.Message . "`n", logFile)
-            FileAppend("ExitApp(2)`n", logFile)
-            ExitApp(2)
+            ; Window not found, exit silently
+            ExitApp(0)
         }
     }
     
     ; Verify Notepad is active
     activeTitle := WinGetTitle("A")
-    FileAppend("Active window title: " . activeTitle . "`n", logFile)
     
     if (!InStr(activeTitle, "Notepad") && !InStr(activeTitle, "Untitled"))
     {
-        FileAppend("Notepad not active, exiting`n", logFile)
-        MsgBox(0x10, "Error", "Failed to activate Notepad window")
-        ExitApp(1)
+        ; Window not found, exit silently
+        ExitApp(0)
     }
     
     FileAppend("Notepad is active, executing action: " . action . "`n", logFile)

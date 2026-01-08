@@ -42,7 +42,7 @@ Define the wheel options that appear in the overlay and the console commands to 
 - `description` - Tooltip text
 - `enabled` - Set to false to hide from wheel
 - `application` - Target application/game (e.g., "Skyrim")
-- `controller` - Execution method (e.g., "AutoHotkey", "skse")
+- `controller` - Execution method (e.g., "AutoHotkey")
 
 ## Running Skyrim with Overlay
 
@@ -146,14 +146,9 @@ Map wheel options to multiple mods:
 
 Create scripts that check game state before executing commands.
 
-## Integration with Mods
+## Integration with Skyrim
 
-The executor can trigger mod features through console commands or via the mod data file at:
-```
-Documents\My Games\Skyrim Special Edition\SKSE\Plugins\overlay-data.json
-```
-
-Mods can monitor this file for changes and react accordingly.
+The overlay can execute any console command in Skyrim via AutoHotkey automation.
 
 ## Performance Notes
 
@@ -166,4 +161,3 @@ Mods can monitor this file for changes and react accordingly.
 
 - [Skyrim Console Commands](https://en.uesp.net/wiki/Skyrim:Console)
 - [AutoHotkey Documentation](https://www.autohotkey.com/)
-- [SKSE Plugin Documentation](https://skse.silverlock.org/)

@@ -74,21 +74,16 @@ Aggregates results and creates report
 - **electron-test-main.js** - Electron app in test mode
 - Uses existing files:
   - application-config-loader.js for configuration
-  - applications/skyrim/executors/console-executor.py for command execution
 
 ## Troubleshooting
 
 **Test timeout occurs**
 - Increase `TEST_TIMEOUT` in test-wheel.js
-- Check that Electron and Python can be spawned in your environment
+- Check that Electron can be spawned in your environment
 
 **Spins not detected**
 - Verify electron-test-main.js is writing to the correct overlay-data.json location
-- Check that console-executor.py is monitoring the correct file
-
-**Commands not queued**
-- Verify wheel-options.json has valid entries
-- Check that command queue file can be written to SKSE Plugins folder
+- Check that wheel config is loaded properly
 
 ## Manual Testing
 
@@ -98,9 +93,6 @@ For interactive testing without automation:
 # Terminal 1: Start overlay
 npm start
 
-# Terminal 2: Start executor
-python applications/skyrim/executors/console-executor.py
-
-# Terminal 3: Manual wheel spinning
+# Terminal 2: Manual wheel spinning
 # Interact with overlay in window to spin wheel
 ```

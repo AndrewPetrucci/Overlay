@@ -164,8 +164,7 @@ class ModIntegration {
             console.error('Failed to load mod config:', error);
             return {
                 mods: {},
-                wheelMappings: {},
-                dataPath: path.join(process.env.USERPROFILE, 'Documents/My Games/Skyrim Special Edition/SKSE/Plugins/overlay-data.json')
+                wheelMappings: {}
             };
         }
     }
