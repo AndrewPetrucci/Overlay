@@ -333,12 +333,12 @@ ipcMain.on('spin-wheel', (event, wheelResult) => {
                 // Execute executor.ahk with entire config object as JSON
                 const ahkScript = path.join(__dirname, 'controllers', 'autohotkey', 'executor.ahk');
                 const configJson = JSON.stringify(wheelResult.config);
-                
+
                 // Get the application's AutoHotkey configuration
                 const appConfig = applicationConfigs[application] || {};
                 const autohotKeyConfig = appConfig.controllers?.AutoHotkey || {};
                 const autohotKeyJson = JSON.stringify(autohotKeyConfig);
-                
+
                 console.log(`Executing: ${ahkScript} with config: ${configJson}`);
                 console.log(`With AutoHotkey config: ${autohotKeyJson}`);
 
