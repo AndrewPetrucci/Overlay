@@ -258,7 +258,7 @@ class WheelRenderingTest {
             }
 
             // Test 8: Take screenshot
-            const screenshotPath = path.join(__dirname, 'test-screenshots', `wheel-render-${Date.now()}.png`);
+            const screenshotPath = path.join(__dirname, 'tmp', 'test-screenshots', `wheel-render-${Date.now()}.png`);
             const screenshotDir = path.dirname(screenshotPath);
 
             if (!fs.existsSync(screenshotDir)) {
@@ -435,7 +435,7 @@ class WheelRenderingTest {
     async cleanupOldScreenshots() {
         this.log('Cleaning up old test screenshots (keeping reference image)...');
 
-        const screenshotDir = path.join(__dirname, 'test-screenshots');
+        const screenshotDir = path.join(__dirname, 'tmp', 'test-screenshots');
         const referenceImagePath = path.join(screenshotDir, 'reference-initial-state.png');
 
         if (!fs.existsSync(screenshotDir)) {

@@ -43,23 +43,6 @@ You should see output like: `2.0-a### (###)`
 
 ## Scripts
 
-### skyrim-executor.ahk
-
-Executes console commands in Skyrim Special Edition.
-
-**Workflow:**
-1. Monitors `overlay-commands.txt` for new commands
-2. Focuses the Skyrim window
-3. Opens console with `` ` `` (backtick/tilde key)
-4. Types the command
-5. Presses Enter to execute
-6. Closes console with Escape
-
-**Running manually:**
-```powershell
-AutoHotkey.exe skyrim-executor.ahk
-```
-
 ### notepad-executor.ahk
 
 Executes keyboard input in Notepad (test/demo executor).

@@ -71,10 +71,10 @@ class NotepadWheelTester {
                     // No existing processes to kill
                 }
 
-                // Use a unique temp filename with timestamp in test-text folder
+                // Use a unique temp filename with timestamp in tmp/test-text folder
                 const fs = require('fs');
                 const timestamp = Date.now();
-                const testTextDir = path.join(__dirname, 'test-text');
+                const testTextDir = path.join(__dirname, 'tmp', 'test-text');
 
                 // Ensure test-text directory exists
                 if (!fs.existsSync(testTextDir)) {
@@ -172,8 +172,8 @@ class NotepadWheelTester {
         this.log('Configuring wheel with test options...');
         this.log(`Number of wheel options to load: ${this.wheelOptions.length}`);
 
-        // Create temporary wheel-options-test.json file
-        const wheelTestConfigPath = path.join(__dirname, 'wheel-options-test.json');
+        // Create temporary wheel-options-test.json file in tmp folder
+        const wheelTestConfigPath = path.join(__dirname, 'tmp', 'wheel-options-test.json');
 
         try {
             const testConfig = {
@@ -637,7 +637,7 @@ ExitApp
             // Clean up old test files from previous runs
             try {
                 const fs = require('fs');
-                const testTextDir = path.join(__dirname, 'test-text');
+                const testTextDir = path.join(__dirname, 'tmp', 'test-text');
                 if (fs.existsSync(testTextDir)) {
                     const files = fs.readdirSync(testTextDir);
                     files.forEach(file => {

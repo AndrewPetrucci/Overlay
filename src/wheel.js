@@ -239,8 +239,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     try {
         // Try in order: test config (if running tests), then root-level
         const pathsToTry = [
-            `../wheel-options-test.json`,  // Test config (highest priority)
-            `../wheel-options.json`        // Root-level config
+            `../tmp/wheel-options-test.json`,  // Test config (highest priority)
+            `../wheel-options.json`            // Root-level config
         ];
 
         let response = null;

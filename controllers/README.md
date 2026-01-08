@@ -27,7 +27,7 @@ Wheel Spin → Python Executor → Command Queue File → Controller → Game Ac
 ## Available Controllers
 
 ### AutoHotkey (Windows)
-- **Location**: `controllers/autohotkey/skyrim-executor.ahk` (Skyrim), `controllers/autohotkey/notepad-executor.ahk` (Notepad)
+- **Location**: `controllers/autohotkey/notepad-executor.ahk` (Notepad)
 - **Requirements**: AutoHotkey v2.0+
 - **Installation**:
   1. Download and install [AutoHotkey v2.0+](https://www.autohotkey.com/download/)
@@ -35,13 +35,6 @@ Wheel Spin → Python Executor → Command Queue File → Controller → Game Ac
   3. AutoHotkey will be automatically available in your PATH
   4. Verify installation by running `AutoHotkey.exe --version` in PowerShell
   5. The scripts can now be executed directly via `AutoHotkey.exe script-name.ahk`
-
-- **How it works (Skyrim)**:
-  1. Monitors `overlay-commands.txt`
-  2. Activates Skyrim window
-  3. Opens console with ` (backtick) key
-  4. Types command and presses Enter
-  5. Closes console with Escape
 
 - **How it works (Notepad)**:
   1. Detects wheel spin result
@@ -115,35 +108,29 @@ tgm
    https://www.autohotkey.com/download/
    ```
 
-2. Run the executor script:
-   ```
-   .\controllers\autohotkey\skyrim-executor.ahk
-   ```
+2. Run the executor script for your application
 
 3. Keep the script running in background
-4. Start the Skyrim overlay: `npm start`
-5. Start Python executor: `python applications/skyrim/executors/console-executor.py`
+4. Start the overlay: `npm start`
+5. Start Python executor for your application
 
 ### Tips
 
-- **Script Won't Work?** Make sure Skyrim window is active/in focus
+- **Script Won't Work?** Make sure target window is active/in focus
 - **Slow Execution?** Increase sleep delays in the script
-- **Commands Not Executing?** Check that console opens with backtick (`)
-- **Window Detection Issues?** Verify window title matches "Skyrim"
+- **Commands Not Executing?** Verify the script configuration
+- **Window Detection Issues?** Verify window title matches the application
 
 ## Testing
 
 1. Start all components:
    - Overlay: `npm start`
-   - Executor: `python applications/skyrim/executors/console-executor.py`
-   - Controller: `.\controllers\autohotkey\skyrim-executor.ahk`
+   - Executor: `python applications/[game]/executors/console-executor.py`
+   - Controller: `.\controllers\autohotkey\[game]-executor.ahk`
 
 2. Spin the wheel in the overlay
 
-3. Watch the controller execute the command:
-   - Skyrim window should activate
-   - Console should open and close
-   - Command effect should occur in game
+3. Watch the controller execute the command in the target application
 
 ## Command Queue Persistence
 
