@@ -1,0 +1,8 @@
+{
+    "applicationDataPaths": {
+        "notepad": "%USERPROFILE%\\Documents\\Overlay\\tmp\\overlay-data.json",
+        "skyrim": "%USERPROFILE%\\Documents\\Overlay\\tmp\\overlay-data.json"
+    },
+    "mods": {},
+    "wheelMappings": {}
+}

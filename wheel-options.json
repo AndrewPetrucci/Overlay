@@ -1,54 +1,34 @@
 {
     "controllers": {
-        "AutoHotkey": {}
+        "AutoHotkey": {
+            "applicationName": "Skyrim Special Edition",
+            "consoleOpen": "`",
+            "consoleClose": "`"
+        }
     },
     "options": [
         {
-            "name": "Insert Timestamp",
-            "command": "insert_timestamp",
-            "description": "Insert current date and time",
-            "enabled": false,
-            "application": "Notepad",
-            "controller": "AutoHotkey",
-            "config": {
-                "action": "send_keys",
-                "value": "^+t"
-            }
-        },
-        {
-            "name": "Save File",
-            "command": "save_file",
-            "description": "Save the current document",
-            "enabled": false,
-            "application": "Notepad",
-            "controller": "AutoHotkey",
-            "config": {
-                "action": "send_keys",
-                "value": "^s"
-            }
-        },
-        {
-            "name": "New File",
-            "command": "new_file",
-            "description": "Create a new document",
-            "enabled": false,
-            "application": "Notepad",
-            "controller": "AutoHotkey",
-            "config": {
-                "action": "send_keys",
-                "value": "^n"
-            }
-        },
-        {
-            "name": "Hello World",
-            "command": "hello_world",
-            "description": "Insert Hello World text",
+            "name": "Teleport to Whiterun",
+            "command": "coc Whiterun",
+            "description": "Teleport to Whiterun",
             "enabled": true,
-            "application": "Notepad",
+            "application": "Skyrim",
             "controller": "AutoHotkey",
             "config": {
                 "action": "insert_text",
-                "value": "hello world"
+                "value": "coc Whiterun{Enter}"
+            }
+        },
+        {
+            "name": "Spawn Dragons",
+            "command": "spawn_draggons",
+            "description": "Spawns Three Dragons",
+            "enabled": true,
+            "application": "Skyrim",
+            "controller": "AutoHotkey",
+            "config": {
+                "action": "insert_text",
+                "value": "player.placeatme F77F8 3{Enter}"
             }
         }
     ]

@@ -325,10 +325,11 @@ ipcMain.on('spin-wheel', (event, wheelResult) => {
 
         // wheelResult is now the full option object with config
         if (wheelResult.config) {
-            // Determine which executor to use based on application
+            // Determine which executor to use based on application and controller
             const application = wheelResult.application || 'Notepad';
+            const controller = wheelResult.controller || 'AutoHotkey';
 
-            if (application === 'Notepad') {
+            if (controller === 'AutoHotkey') {
                 // Execute executor.ahk with entire config object as JSON
                 const ahkScript = path.join(__dirname, 'controllers', 'autohotkey', 'executor.ahk');
                 const configJson = JSON.stringify(wheelResult.config);

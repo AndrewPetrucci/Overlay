@@ -11,7 +11,13 @@
 ;
 ; PARAMETERS:
 ; A_Args[1] = config as JSON string (e.g., {"action":"send_keys","value":"^s"})
-; A_Args[2] = optional application config JSON (e.g., {"applicationName":"Notepad"})
+; A_Args[2] = optional application config JSON 
+;             Schema: {
+;               "applicationName": "string - name of application for logging/verification",
+;               "consoleOpen": "string - key to open console (e.g., backtick or tilde)",
+;               "consoleClose": "string - key to close console (e.g., backtick or tilde)"
+;             }
+;             Example: {"applicationName":"Skyrim Special Edition","consoleOpen":"`","consoleClose":"`"}
 
 A_SendMode := "Input"
 
@@ -21,12 +27,27 @@ additionalJson := A_Args.Length >= 2 ? A_Args[2] : ""
 
 ; Extract applicationName from additional JSON
 applicationName := "Notepad"
+consoleOpen := ""
+consoleClose := ""
+
 if (additionalJson != "")
 {
     extractedName := ExtractJsonValue(additionalJson, "applicationName")
     if (extractedName != "")
     {
         applicationName := extractedName
+    }
+    
+    extractedOpen := ExtractJsonValue(additionalJson, "consoleOpen")
+    if (extractedOpen != "")
+    {
+        consoleOpen := extractedOpen
+    }
+    
+    extractedClose := ExtractJsonValue(additionalJson, "consoleClose")
+    if (extractedClose != "")
+    {
+        consoleClose := extractedClose
     }
 }
 
@@ -59,7 +80,21 @@ FileAppend("Extracted Action: " . action . "`n", logFile)
 FileAppend("Extracted Value: " . value . "`n", logFile)
 
 ; Execute the action
-Execute(action, value)
+Execute(action, value, applicationName)
+
+; Helper function to process escape sequences in strings
+; Converts \n, \r, \t etc. to actual characters
+ProcessEscapeSequences(str)
+{
+    ; Replace escape sequences with actual characters
+    result := str
+    result := StrReplace(result, "\n", "`n")        ; Newline
+    result := StrReplace(result, "\r", "`r")        ; Carriage return
+    result := StrReplace(result, "\t", "`t")        ; Tab
+    result := StrReplace(result, "\0", "`0")        ; Null character
+    result := StrReplace(result, "\\", "\")         ; Literal backslash (do this last to avoid double-processing)
+    return result
+}
 
 ; Helper function to extract a value from JSON string
 ; Uses Chr(34) for double quote to avoid escaping issues
@@ -102,7 +137,7 @@ ExtractJsonValue(jsonStr, keyName)
 }
 
 ; Main execution function
-Execute(action, value)
+Execute(action, value, applicationName)
 {
     global logFile
     
@@ -118,16 +153,24 @@ Execute(action, value)
         ExitApp(0)
     }
     
-    ; Verify Application is active
+    ; Verify Application is active - check for the application name in the window title
     activeTitle := WinGetTitle("A")
     
-    if (!InStr(activeTitle, "Notepad") && !InStr(activeTitle, "Untitled"))
+    if (!InStr(activeTitle, applicationName))
     {
         ; Window not found, exit silently
         ExitApp(0)
     }
     
     FileAppend("Application is active, executing action: " . action . "`n", logFile)
+    
+    ; Send console open key if configured
+    if (consoleOpen != "")
+    {
+        FileAppend("Sending console open key: " . consoleOpen . "`n", logFile)
+        Send(consoleOpen)
+        Sleep(200)  ; Wait for console to open
+    }
     
     ; Execute based on action type
     if (action = "send_keys")
@@ -139,12 +182,38 @@ Execute(action, value)
     else if (action = "insert_text")
     {
         FileAppend("Inserting text: " . value . "`n", logFile)
-        A_Clipboard := value
-        Sleep(100)
         
-        ; Paste with Ctrl+V
-        Send("^v")
-        Sleep(100)
+        ; Process escape sequences in the value
+        processedValue := ProcessEscapeSequences(value)
+        
+        ; Check if value contains {Enter} and handle separately
+        if (InStr(processedValue, "{Enter}"))
+        {
+            ; Extract text before {Enter}
+            enterPos := InStr(processedValue, "{Enter}")
+            textPart := SubStr(processedValue, 1, enterPos - 1)
+            
+            FileAppend("Text with Enter key: " . textPart . " + Enter`n", logFile)
+            
+            ; Paste the text part
+            A_Clipboard := textPart
+            Sleep(100)
+            Send("^v")
+            Sleep(100)
+            
+            ; Then send Enter
+            Send("{Enter}")
+            Sleep(100)
+        }
+        else
+        {
+            ; Normal paste without Enter
+            A_Clipboard := processedValue
+            Sleep(100)
+            Send("^v")
+            Sleep(100)
+        }
+        
         FileAppend("Text inserted via clipboard paste`n", logFile)
     }
     else
@@ -154,6 +223,13 @@ Execute(action, value)
         Sleep(100)
         Send("^v")
         Sleep(100)
+    }
+    
+    ; Send console close key if configured
+    if (consoleClose != "")
+    {
+        FileAppend("Sending console close key: " . consoleClose . "`n", logFile)
+        Send(consoleClose)
     }
     
     FileAppend("Execute completed, exiting with code 0`n", logFile)

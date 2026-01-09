@@ -88,10 +88,14 @@ class SpinWheel {
         console.log(`[Wheel] Auto-spin enabled: every ${this.autoSpinInterval / 1000} seconds`);
     }
 
+    getSliceColor(index) {
+        // Use color from optionObjects if available, otherwise fall back to colors array
+        return this.optionObjects[index]?.color || this.colors[index % this.colors.length];
+    }
+
     draw() {
         // Clear canvas
-        this.ctx.fillStyle = 'rgba(0, 0, 0, 0)';
-        this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+        this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
 
         // Draw wheel
         this.ctx.save();
@@ -108,7 +112,7 @@ class SpinWheel {
                 (i * sliceAngle * Math.PI) / 180,
                 ((i + 1) * sliceAngle * Math.PI) / 180);
             this.ctx.closePath();
-            this.ctx.fillStyle = this.colors[i % this.colors.length];
+            this.ctx.fillStyle = this.getSliceColor(i);
             this.ctx.fill();
             this.ctx.strokeStyle = 'white';
             this.ctx.lineWidth = 3;
@@ -146,7 +150,7 @@ class SpinWheel {
         this.ctx.fill();
 
         if (this.isSpinning) {
-            this.rotation += this.spinVelocity;
+            this.rotation -= this.spinVelocity;
             this.spinVelocity *= this.friction;
 
             if (this.spinVelocity < 0.5) {

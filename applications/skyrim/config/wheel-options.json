@@ -1,27 +1,34 @@
 {
+    "controllers": {
+        "AutoHotkey": {
+            "applicationName": "Skyrim Special Edition",
+            "consoleOpen": "`",
+            "consoleClose": "`"
+        }
+    },
     "options": [
         {
             "name": "Teleport to Whiterun",
             "command": "coc Whiterun",
             "description": "Teleport to Whiterun",
             "enabled": true,
-            "application": "skyrim",
+            "application": "Skyrim",
             "controller": "AutoHotkey",
             "config": {
-                "action": "send_keys",
-                "value": "~coc Whiterun{Enter}"
+                "action": "insert_text",
+                "value": "coc Whiterun{Enter}"
             }
         },
         {
-            "name": "Teleport to Solitude",
-            "command": "coc Solitude",
-            "description": "Teleport to Solitude",
+            "name": "Spawn Dragons",
+            "command": "spawn_draggons",
+            "description": "Spawns Three Dragons",
             "enabled": true,
-            "application": "skyrim",
+            "application": "Skyrim",
             "controller": "AutoHotkey",
             "config": {
-                "action": "send_keys",
-                "value": "~coc Solitude{Enter}"
+                "action": "insert_text",
+                "value": "player.placeatme F77F8 3{Enter}"
             }
         }
     ]
