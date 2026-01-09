@@ -3,6 +3,7 @@ const { contextBridge, ipcRenderer } = require('electron');
 contextBridge.exposeInMainWorld('electron', {
     spinWheel: (result) => ipcRenderer.send('spin-wheel', result),
     onSpinResult: (callback) => ipcRenderer.on('spin-result', (event, result) => callback(result)),
+    onLoadWheelOptions: (callback) => ipcRenderer.on('load-wheel-options', (event, options) => callback(options)),
     onSpinHotkey: (callback) => ipcRenderer.on('spin-wheel-hotkey', () => callback()),
     onTwitchStatusChanged: (callback) => ipcRenderer.on('twitch-status-changed', (event, status) => callback(status)),
     mouseOverInteractive: (isOver) => ipcRenderer.send('mouse-over-interactive', isOver),

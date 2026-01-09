@@ -21,18 +21,29 @@ class ApplicationConfigLoader {
     loadWheelOptions() {
         try {
             const optionsFile = path.join(this.configDir, 'wheel-options.json');
+            const controllerOptionsFile = path.join(this.configDir, 'controller-options.json');
+
             if (fs.existsSync(optionsFile)) {
                 const content = fs.readFileSync(optionsFile, 'utf-8');
                 const data = JSON.parse(content);
-                // Handle both flat array and {options: [], controllers: {}} format
+                // Handle both flat array and {options: []} format
                 this.wheelOptions = Array.isArray(data) ? data : (data.options || []);
-                this.controllers = Array.isArray(data) ? {} : (data.controllers || {});
                 console.log(`[Config] Loaded ${this.wheelOptions.length} wheel options for ${this.applicationName}`);
-                return this.wheelOptions;
             } else {
                 console.warn(`[Config] wheel-options.json not found at ${optionsFile}`);
-                return [];
             }
+
+            // Load controller-specific options if available
+            if (fs.existsSync(controllerOptionsFile)) {
+                const content = fs.readFileSync(controllerOptionsFile, 'utf-8');
+                const data = JSON.parse(content);
+                this.controllers = data.controllers || {};
+                console.log(`[Config] Loaded controller options for ${this.applicationName}`);
+            } else {
+                console.warn(`[Config] controller-options.json not found at ${controllerOptionsFile}`);
+            }
+
+            return this.wheelOptions;
         } catch (error) {
             console.error('[Config] Error loading wheel options:', error.message);
             return [];

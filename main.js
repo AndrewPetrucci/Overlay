@@ -6,11 +6,12 @@ const TwitchClient = require('./src/twitch');
 const ModIntegration = require('./src/mod-integration');
 const ApplicationConfigLoader = require('./src/application-config-loader');
 
-let mainWindow;
+const windows = {}; // Map to store windows by ID
 let twitchClient;
 let modIntegration;
 let gameConfig;
 let applicationConfigs = {};
+let uniqueApplications = new Set(); // Move to global scope
 
 // Get auto-spin setting from environment (default: false)
 // Set AUTO_SPIN=true to enable
@@ -19,8 +20,8 @@ const AUTO_SPIN = process.env.AUTO_SPIN === 'true' || process.argv.includes('--e
 const WINDOW_WIDTH = 600;
 const WINDOW_HEIGHT = 600;
 
-function createWindow() {
-    mainWindow = new BrowserWindow({
+function createWindow(htmlFile = 'src/windows/wheel/index.html') {
+    const window = new BrowserWindow({
         width: WINDOW_WIDTH,
         height: WINDOW_HEIGHT,
         minWidth: WINDOW_WIDTH,
@@ -43,55 +44,86 @@ function createWindow() {
         }
     });
 
-    mainWindow.loadFile('src/index.html');
+    const windowId = window.id;
+    windows[windowId] = window;
+    console.log(`Created window with ID: ${windowId} - Loading: ${htmlFile}`);
+
+    window.loadFile(htmlFile);
 
     // Force window to stay at exact size (set after load to ensure it takes effect)
-    mainWindow.webContents.on('did-finish-load', () => {
-        mainWindow.setMinimumSize(WINDOW_WIDTH, WINDOW_HEIGHT);
-        mainWindow.setMaximumSize(WINDOW_WIDTH, WINDOW_HEIGHT);
+    window.webContents.on('did-finish-load', () => {
+        window.setMinimumSize(WINDOW_WIDTH, WINDOW_HEIGHT);
+        window.setMaximumSize(WINDOW_WIDTH, WINDOW_HEIGHT);
     });
 
-    // Register global hotkey for wheel spin (disabled - using auto-spin instead)
-    // Uncomment below to enable manual hotkey
-    // globalShortcut.register('Shift+F1', () => {
-    //     mainWindow.webContents.send('spin-wheel-hotkey');
-    //     console.log('Global Shift+F1 hotkey triggered - spinning wheel');
-    // });
-
     // Start with mouse events ignored so clicks pass through
-    mainWindow.setIgnoreMouseEvents(true, { forward: true });
+    window.setIgnoreMouseEvents(true, { forward: true });
+
+    // Open DevTools in dev mode
+    if (process.argv.includes('--dev')) {
+        window.webContents.openDevTools({ mode: 'detach' });
+    }
+
+    window.on('closed', () => {
+        delete windows[windowId];
+        console.log(`Window ${windowId} closed`);
+    });
+
+    return windowId;
+}
+
+function registerIpcHandlers() {
+    // Helper to get window from IPC event
+    const getWindowFromEvent = (event) => {
+        return BrowserWindow.fromWebContents(event.sender);
+    };
 
     // Listen for messages from renderer about interactive elements
     ipcMain.on('mouse-over-interactive', (event, isOver) => {
-        mainWindow.setIgnoreMouseEvents(!isOver, { forward: true });
+        const window = getWindowFromEvent(event);
+        if (window) {
+            window.setIgnoreMouseEvents(!isOver, { forward: true });
+        }
     });
 
     ipcMain.on('move-window', (event, { deltaX, deltaY }) => {
-        const bounds = mainWindow.getBounds();
-        mainWindow.setBounds({
-            x: bounds.x + deltaX,
-            y: bounds.y + deltaY,
-            width: WINDOW_WIDTH,
-            height: WINDOW_HEIGHT
-        });
+        const window = getWindowFromEvent(event);
+        if (window) {
+            const bounds = window.getBounds();
+            window.setBounds({
+                x: bounds.x + deltaX,
+                y: bounds.y + deltaY,
+                width: WINDOW_WIDTH,
+                height: WINDOW_HEIGHT
+            });
+        }
     });
 
     ipcMain.on('move-window-to', (event, { x, y }) => {
-        mainWindow.setBounds({
-            x: x,
-            y: y,
-            width: WINDOW_WIDTH,
-            height: WINDOW_HEIGHT
-        });
+        const window = getWindowFromEvent(event);
+        if (window) {
+            window.setBounds({
+                x: x,
+                y: y,
+                width: WINDOW_WIDTH,
+                height: WINDOW_HEIGHT
+            });
+        }
     });
 
     ipcMain.on('get-window-position', (event) => {
-        const [x, y] = mainWindow.getPosition();
-        event.returnValue = { x, y };
+        const window = getWindowFromEvent(event);
+        if (window) {
+            const [x, y] = window.getPosition();
+            event.returnValue = { x, y };
+        }
     });
 
     ipcMain.on('resize-window', (event, { width, height }) => {
-        mainWindow.setSize(width, height);
+        const window = getWindowFromEvent(event);
+        if (window) {
+            window.setSize(width, height);
+        }
     });
 
     // Mod integration handlers
@@ -143,48 +175,85 @@ function createWindow() {
         return AUTO_SPIN;
     });
 
-    ipcMain.on('minimize-window', () => {
-        mainWindow.minimize();
+    ipcMain.on('minimize-window', (event) => {
+        const window = getWindowFromEvent(event);
+        if (window) {
+            window.minimize();
+        }
     });
 
-    ipcMain.on('close-window', () => {
-        mainWindow.close();
-    });
-
-    // Open DevTools in dev mode
-    if (process.argv.includes('--dev')) {
-        mainWindow.webContents.openDevTools({ mode: 'detach' });
-    }
-
-    mainWindow.on('closed', () => {
-        mainWindow = null;
+    ipcMain.on('close-window', (event) => {
+        const window = getWindowFromEvent(event);
+        if (window) {
+            window.close();
+        }
     });
 }
 
 app.on('ready', () => {
-    createWindow();
+    registerIpcHandlers();
 
-    // Load master wheel-options.json to discover applications
-    const wheelOptionsPath = path.join(__dirname, 'wheel-options.json');
-    let allWheelOptions = [];
-    let uniqueApplications = new Set();
+    // Load windows configuration
+    const windowsConfigPath = path.join(__dirname, 'windows-config.json');
+    let windowsConfig = { windows: [] };
 
     try {
-        const wheelOptionsContent = fs.readFileSync(wheelOptionsPath, 'utf-8');
-        const wheelOptionsData = JSON.parse(wheelOptionsContent);
-        allWheelOptions = Array.isArray(wheelOptionsData) ? wheelOptionsData : (wheelOptionsData.options || []);
-
-        // Extract unique applications
-        allWheelOptions.forEach(option => {
-            if (option.application) {
-                uniqueApplications.add(option.application.toLowerCase());
-            }
-        });
-
-        console.log(`[Main] Discovered applications: ${Array.from(uniqueApplications).join(', ')}`);
+        const configContent = fs.readFileSync(windowsConfigPath, 'utf-8');
+        windowsConfig = JSON.parse(configContent);
+        console.log(`[Main] Loaded windows configuration with ${windowsConfig.windows.length} window(s)`);
     } catch (error) {
-        console.warn(`[Main] Failed to load wheel-options.json: ${error.message}`);
+        console.warn(`[Main] Failed to load windows-config.json: ${error.message}. Using default.`);
     }
+
+    // Create windows from config
+    const createdWindows = [];
+    windowsConfig.windows.forEach((windowConfig, index) => {
+        if (windowConfig.enabled) {
+            const windowId = createWindow(windowConfig.html);
+            createdWindows.push({ id: windowId, config: windowConfig });
+            console.log(`[Main] Created window "${windowConfig.name}" (ID: ${windowId}) from ${windowConfig.html}`);
+
+            // Apply position offset if configured
+            const window = windows[windowId];
+            if (window && windowConfig.position && (windowConfig.position.xOffset !== 0 || windowConfig.position.yOffset !== 0)) {
+                window.webContents.once('did-finish-load', () => {
+                    const bounds = window.getBounds();
+                    window.setBounds({
+                        x: bounds.x + windowConfig.position.xOffset,
+                        y: bounds.y + windowConfig.position.yOffset,
+                        width: bounds.width,
+                        height: bounds.height
+                    });
+                    console.log(`[Main] Positioned window "${windowConfig.name}" at offset (${windowConfig.position.xOffset}, ${windowConfig.position.yOffset})`);
+                });
+            }
+
+            // Pass wheel options to wheel window via IPC
+            if (windowConfig.id === 'wheel' && windowConfig.wheelOptions) {
+                window.webContents.once('did-finish-load', () => {
+                    window.webContents.send('load-wheel-options', windowConfig.wheelOptions);
+                    console.log(`[Main] Sent ${windowConfig.wheelOptions.length} wheel options to wheel window`);
+                });
+            }
+        } else {
+            console.log(`[Main] Window "${windowConfig.name}" is disabled, skipping creation`);
+        }
+    });
+
+    // Extract wheel options from config instead of loading from file
+    const wheelWindowConfig = windowsConfig.windows.find(w => w.id === 'wheel');
+    let allWheelOptions = wheelWindowConfig?.wheelOptions || [];
+    uniqueApplications.clear(); // Clear any previous applications
+
+    // Extract unique applications
+    allWheelOptions.forEach(option => {
+        if (option.application) {
+            uniqueApplications.add(option.application.toLowerCase());
+        }
+    });
+
+    console.log(`[Main] Discovered applications: ${Array.from(uniqueApplications).join(', ')}`);
+    console.log(`[Main] Loaded ${allWheelOptions.length} wheel options from windows-config.json`);
 
     // Load configuration for each discovered application
     uniqueApplications.forEach(appName => {
@@ -313,8 +382,8 @@ app.on('window-all-closed', () => {
 });
 
 app.on('activate', () => {
-    if (mainWindow === null) {
-        createWindow();
+    if (Object.keys(windows).length === 0) {
+        createWindow('src/windows/wheel/index.html');
     }
 });
 
@@ -353,8 +422,9 @@ ipcMain.on('spin-wheel', (event, wheelResult) => {
 
         // TODO: Send to Skyrim mod via HTTP or file I/O
         // For now, just broadcast back to renderer
-        if (mainWindow && mainWindow.webContents) {
-            mainWindow.webContents.send('spin-result', wheelResult.name || wheelResult);
+        const window = BrowserWindow.fromWebContents(event.sender);
+        if (window && window.webContents) {
+            window.webContents.send('spin-result', wheelResult.name || wheelResult);
         }
     } catch (error) {
         console.error('Error handling spin-wheel:', error);

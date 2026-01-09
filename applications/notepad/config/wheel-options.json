@@ -1,11 +1,4 @@
 {
-    "controllers": {
-        "AutoHotkey": {
-            "notepad": {
-                "applicationName": "Notepad"
-            }
-        }
-    },
     "options": [
         {
             "name": "Insert Timestamp",
