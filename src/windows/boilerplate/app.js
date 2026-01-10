@@ -39,7 +39,12 @@ class BoilerplateApp {
 
     onActionButtonClick() {
         console.log('[BoilerplateApp] Action button clicked');
-        // Add your custom logic here
+        if (window.electron) {
+            window.electron.sendMessage('button-click', {
+                buttonId: 'actionBtn',
+                timestamp: Date.now()
+            });
+        }
     }
 }
 

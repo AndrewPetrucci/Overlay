@@ -113,7 +113,14 @@
                 "offset": 1,
                 "xOffset": -610,
                 "yOffset": 0
-            }
+            },
+            "buttonOptions": [
+                {
+                    "id": "actionBtn",
+                    "controller": "AutoHotkey",
+                    "config": {}
+                }
+            ]
         }
     ],
     "defaults": {

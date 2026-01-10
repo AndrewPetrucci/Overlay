@@ -33,7 +33,7 @@ class NotepadWheelTester {
         this.expectedText = 'hello world';
 
         // Load wheel options from the actual Notepad config
-        const notepadConfigPath = path.join(__dirname, 'applications', 'notepad', 'config', 'wheel-options.json');
+        const notepadConfigPath = path.join(__dirname, 'src', 'applications', 'notepad', 'config', 'wheel-options.json');
         try {
             const configData = JSON.parse(fs.readFileSync(notepadConfigPath, 'utf-8'));
             this.wheelOptions = configData.options;

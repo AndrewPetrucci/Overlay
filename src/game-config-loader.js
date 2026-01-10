@@ -50,7 +50,7 @@ class ApplicationConfigLoader {
 
     listAvailableApplications() {
         try {
-            const applicationsDir = path.join(__dirname, '..', 'applications');
+            const applicationsDir = path.join(__dirname, 'applications');
             if (!fs.existsSync(applicationsDir)) {
                 return [];
             }

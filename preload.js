@@ -14,6 +14,7 @@ contextBridge.exposeInMainWorld('electron', {
     getAutoSpinConfig: () => ipcRenderer.invoke('get-auto-spin-config'),
     minimizeWindow: () => ipcRenderer.send('minimize-window'),
     closeWindow: () => ipcRenderer.send('close-window'),
+    sendMessage: (channel, data) => ipcRenderer.send(channel, data),
 
     // Mod Integration
     wheelSpinResult: (result) => ipcRenderer.send('wheel-spin-result', result),

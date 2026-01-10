@@ -1,7 +1,7 @@
 /**
  * Queue Worker Process
  * Each worker process handles a single queue and executes items
- * Spawned by WheelQueueManager as a child process
+ * Spawned by QueueManager as a child process
  */
 
 const path = require('path');
@@ -30,7 +30,7 @@ class QueueWorker {
         }
 
         try {
-            const controllerPath = path.join(__dirname, `../../../controllers/${controller.toLowerCase()}/executor-controller`);
+            const controllerPath = path.join(__dirname, `../../controllers/${controller.toLowerCase()}/executor-controller`);
             const module = require(controllerPath);
             this.controllerModuleCache[controller] = module;
             console.log(`[QueueWorker:${this.queueName}] Loaded controller module: ${controller}`);
@@ -94,7 +94,7 @@ class QueueWorker {
 
                 try {
                     if (wheelResult.config) {
-                        const controller = wheelResult.controller || 'AutoHotkey';
+                        const controller = wheelResult.controller || 'file-writer';
 
                         // Dynamically load and execute the controller
                         const controllerModule = this.getControllerModule(controller);

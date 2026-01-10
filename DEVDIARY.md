@@ -39,3 +39,13 @@ The current implementation has been tested from the ui, to autohotkey, to a targ
 
 5. **Notepad Receives Text**
    - This is the target application where the text gets written or commands getsent! Enjoy your ascii art hud!
+
+#### Development Planning
+Ok so what's next? Well I'm happy with this as an initial implementation but I have some things I want to change. I want to be able to run hultiple different uis at the same time that all write to the same set of queues instead of a file (currently the spinner writes to a file AND spins a process up)
+The goal is to be able to plug and play any leg of the ecosystem.
+Here is the layout
+1. the main process. This is a process that you start from the command line w/ npm start. This process is responsible for setting everything up. It consumes a set of configs and creates all the queues and files required to opperate. this shoud be the most lightweight webserver possible that you can also ssh into to control.
+2. Resources/dependancies! I want the model (static data) to be distributed across a variety of plug and play data stores. Currently only file is supported but this should be extensible to other resource types. I want to get queues working next.
+3. the overlayS pulral! These electron applications are intended to be quick and snappy ui elements that run independently of each other. How you sequence monitor processes to grab items from queues and process them is up to the plugin creator. (terms are still in motion. Will do more research)
+
+now thats a lot of words. I'm going to be reskinning the wheel in the short term to something I'm more proud of. After that I'll work on splitting the electron app into a server and implementing different queue logic. Some schemas will have to change but so is life. I want to wrap up the next section of development by creating a second electron app that sits over notepad and provides a list of math operations and custom functions. The test bench for this project will be both the old electron app and the new one running at the same time and sending commands to notepad.

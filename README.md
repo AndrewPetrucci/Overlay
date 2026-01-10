@@ -411,6 +411,93 @@ If you want chat commands to trigger the wheel:
 4. Restart `npm start`
 5. Type `!spin` in your Twitch chat to trigger wheel
 
+## Queue System Architecture
+
+The overlay uses a multi-window queue management system for handling commands asynchronously.
+
+### Queue Structure
+
+**Base Class:** `src/windows/shared/queue-manager.js`
+- Manages IPC queues for each window
+- Spawns worker processes on-demand
+- Handles inter-process communication
+- Distributes configurations to workers
+
+**Worker Process:** `src/windows/shared/queue-worker.js`
+- Runs as a child process for each queue
+- Processes items asynchronously
+- Loads and executes controller modules dynamically
+- Maintains cache of loaded controllers
+
+### How It Works
+
+1. **Window adds item to queue** → QueueManager creates queue if needed
+2. **Worker spawned on-demand** → Child process starts for that queue
+3. **Item sent to worker** → Via IPC message (JSON serialized)
+4. **Worker processes item** → Dynamically loads controller module
+5. **Controller executes** → Command/action runs with provided config
+
+### Configuration Location
+
+**Application Configurations:**
+- **Game configs:** `applications/[game-name]/config/`
+  - `wheel-options.json` - Wheel command definitions
+  - `controller-options.json` - Controller-specific settings
+
+**Queue Configuration:**
+- Passed via IPC messages when worker starts
+- Contains controller type, commands, and execution parameters
+- Stored in `windowConfig` within QueueManager instance
+
+### Adding a New Queue Consumer
+
+To use the queue system in a new window:
+
+1. **Extend SharedQueueManager:**
+   ```javascript
+   const SharedQueueManager = require('./queue-manager.js');
+   
+   class MyWindowQueueManager extends SharedQueueManager {
+       constructor(windowConfig = {}) {
+           super(windowConfig);
+           this.initializeQueues();
+       }
+       
+       initializeQueues() {
+           // Create queues for your window
+           this.createQueue('default');
+           // Load and set application configs
+           this.setApplicationConfigs(this.windowConfig.configs);
+       }
+   }
+   ```
+
+2. **Initialize in your window:**
+   ```javascript
+   const queueManager = new MyWindowQueueManager(windowConfig);
+   
+   // Queue an item for processing
+   queueManager.addToQueue('default', {
+       controller: 'autohotkey', // or 'file-writer'
+       config: { /* controller config */ }
+   });
+   ```
+
+3. **Monitor queue health:**
+   ```javascript
+   const stats = queueManager.getQueueStats();
+   console.log('Queue stats:', stats); // { 'default': 5 }
+   ```
+
+### Controller Modules
+
+Controllers are dynamically loaded based on queue item config. Current controllers:
+
+- `src/controllers/autohotkey/` - Executes AutoHotkey commands
+- `src/controllers/file-writer/` - Writes data to files
+
+Each controller exports an `executeController(config, applicationConfigs)` function.
+
 ## Additional Python Executor Scripts
 
 Two executor scripts are available:

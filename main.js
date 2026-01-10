@@ -106,24 +106,15 @@ function initializeQueueManagers(windowsConfig, wheelOptions, appConfigs) {
             const QueueManagerClass = require(queueManagerPath);
             console.log(`[QueueManager] Loaded queue manager for window type: "${windowType}"`);
 
-            // Initialize based on window type
-            if (windowType === 'wheel') {
-                // Wheel window uses wheel options
-                const manager = new QueueManagerClass(windowConfig.wheelOptions || wheelOptions);
-                manager.setApplicationConfigs(appConfigs);
-                manager.startQueueWorker();
-                queueManagers.set(windowType, manager);
-                console.log(`[QueueManager] Initialized wheel queue manager`);
-            } else {
-                // Other window types may initialize differently
-                const manager = new QueueManagerClass();
-                manager.setApplicationConfigs(appConfigs);
-                manager.startQueueWorker();
-                queueManagers.set(windowType, manager);
-                console.log(`[QueueManager] Initialized queue manager for "${windowType}"`);
-            }
+            // Initialize queue manager with window config
+            const manager = new QueueManagerClass(windowConfig);
+            manager.setApplicationConfigs(appConfigs);
+            manager.startQueueWorker();
+            queueManagers.set(windowType, manager);
+            console.log(`[QueueManager] Initialized queue manager for "${windowType}"`);
         } catch (error) {
-            console.warn(`[QueueManager] Failed to initialize queue manager for "${windowType}": ${error.message}`);
+            console.error(`[QueueManager] Failed to initialize queue manager for "${windowType}": ${error.message}`);
+            console.error(`[QueueManager] Stack trace:`, error.stack);
         }
     });
 }
@@ -430,6 +421,22 @@ ipcMain.on('spin-wheel', (event, wheelResult) => {
         }
     } catch (error) {
         console.error('Error handling spin-wheel:', error);
+    }
+});
+
+ipcMain.on('button-click', (event, clickData) => {
+    try {
+        console.log('Button clicked! Data:', clickData);
+
+        // Get the boilerplate queue manager
+        const boilerplateQueueManager = queueManagers.get('boilerplate');
+        if (boilerplateQueueManager) {
+            boilerplateQueueManager.handleButtonClick(clickData.buttonId, clickData);
+        } else {
+            console.warn('Boilerplate queue manager not initialized');
+        }
+    } catch (error) {
+        console.error('Error handling button-click:', error);
     }
 });
 
