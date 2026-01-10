@@ -223,5 +223,395 @@
     "config": {
       "fileWriterPath": "tmp/sticky-output.json"
     }
+  },
+  {
+    "timestamp": "2026-01-10T16:54:02.008Z",
+    "wheelResult": {
+      "buttonId": "actionBtn",
+      "controller": "file-writer",
+      "config": {
+        "fileWriterPath": "tmp/sticky-output.json"
+      },
+      "timestamp": 1768064041980
+    },
+    "application": "Unknown",
+    "config": {
+      "fileWriterPath": "tmp/sticky-output.json"
+    }
+  },
+  {
+    "timestamp": "2026-01-10T16:54:02.676Z",
+    "wheelResult": {
+      "buttonId": "actionBtn",
+      "controller": "file-writer",
+      "config": {
+        "fileWriterPath": "tmp/sticky-output.json"
+      },
+      "timestamp": 1768064042676
+    },
+    "application": "Unknown",
+    "config": {
+      "fileWriterPath": "tmp/sticky-output.json"
+    }
+  },
+  {
+    "timestamp": "2026-01-10T16:54:03.198Z",
+    "wheelResult": {
+      "buttonId": "actionBtn",
+      "controller": "file-writer",
+      "config": {
+        "fileWriterPath": "tmp/sticky-output.json"
+      },
+      "timestamp": 1768064043198
+    },
+    "application": "Unknown",
+    "config": {
+      "fileWriterPath": "tmp/sticky-output.json"
+    }
+  },
+  {
+    "timestamp": "2026-01-10T16:59:19.816Z",
+    "wheelResult": {
+      "buttonId": "actionBtn",
+      "controller": "file-writer",
+      "config": {
+        "fileWriterPath": "tmp/sticky-output.json"
+      },
+      "timestamp": 1768064359786
+    },
+    "application": "Unknown",
+    "config": {
+      "fileWriterPath": "tmp/sticky-output.json"
+    }
+  },
+  {
+    "timestamp": "2026-01-10T16:59:21.046Z",
+    "wheelResult": {
+      "buttonId": "actionBtn",
+      "controller": "file-writer",
+      "config": {
+        "fileWriterPath": "tmp/sticky-output.json"
+      },
+      "timestamp": 1768064361046
+    },
+    "application": "Unknown",
+    "config": {
+      "fileWriterPath": "tmp/sticky-output.json"
+    }
+  },
+  {
+    "timestamp": "2026-01-10T16:59:22.544Z",
+    "wheelResult": {
+      "buttonId": "actionBtn",
+      "controller": "file-writer",
+      "config": {
+        "fileWriterPath": "tmp/sticky-output.json"
+      },
+      "timestamp": 1768064362544
+    },
+    "application": "Unknown",
+    "config": {
+      "fileWriterPath": "tmp/sticky-output.json"
+    }
+  },
+  {
+    "timestamp": "2026-01-10T17:00:54.465Z",
+    "wheelResult": {
+      "buttonId": "actionBtn",
+      "controller": "file-writer",
+      "config": {
+        "fileWriterPath": "tmp/sticky-output.json"
+      },
+      "timestamp": 1768064454437
+    },
+    "application": "Unknown",
+    "config": {
+      "fileWriterPath": "tmp/sticky-output.json"
+    }
+  },
+  {
+    "timestamp": "2026-01-10T17:00:55.076Z",
+    "wheelResult": {
+      "buttonId": "actionBtn",
+      "controller": "file-writer",
+      "config": {
+        "fileWriterPath": "tmp/sticky-output.json"
+      },
+      "timestamp": 1768064455075
+    },
+    "application": "Unknown",
+    "config": {
+      "fileWriterPath": "tmp/sticky-output.json"
+    }
+  },
+  {
+    "timestamp": "2026-01-10T17:00:55.591Z",
+    "wheelResult": {
+      "buttonId": "actionBtn",
+      "controller": "file-writer",
+      "config": {
+        "fileWriterPath": "tmp/sticky-output.json"
+      },
+      "timestamp": 1768064455591
+    },
+    "application": "Unknown",
+    "config": {
+      "fileWriterPath": "tmp/sticky-output.json"
+    }
+  },
+  {
+    "timestamp": "2026-01-10T17:00:56.082Z",
+    "wheelResult": {
+      "buttonId": "actionBtn",
+      "controller": "file-writer",
+      "config": {
+        "fileWriterPath": "tmp/sticky-output.json"
+      },
+      "timestamp": 1768064456081
+    },
+    "application": "Unknown",
+    "config": {
+      "fileWriterPath": "tmp/sticky-output.json"
+    }
+  },
+  {
+    "timestamp": "2026-01-10T17:00:56.575Z",
+    "wheelResult": {
+      "buttonId": "actionBtn",
+      "controller": "file-writer",
+      "config": {
+        "fileWriterPath": "tmp/sticky-output.json"
+      },
+      "timestamp": 1768064456574
+    },
+    "application": "Unknown",
+    "config": {
+      "fileWriterPath": "tmp/sticky-output.json"
+    }
+  },
+  {
+    "timestamp": "2026-01-10T17:00:57.064Z",
+    "wheelResult": {
+      "buttonId": "actionBtn",
+      "controller": "file-writer",
+      "config": {
+        "fileWriterPath": "tmp/sticky-output.json"
+      },
+      "timestamp": 1768064457063
+    },
+    "application": "Unknown",
+    "config": {
+      "fileWriterPath": "tmp/sticky-output.json"
+    }
+  },
+  {
+    "timestamp": "2026-01-10T17:05:29.234Z",
+    "wheelResult": {
+      "buttonId": "actionBtn",
+      "controller": "file-writer",
+      "config": {
+        "fileWriterPath": "tmp/sticky-output.json"
+      },
+      "timestamp": 1768064729204
+    },
+    "application": "Unknown",
+    "config": {
+      "fileWriterPath": "tmp/sticky-output.json"
+    }
+  },
+  {
+    "timestamp": "2026-01-10T17:05:29.875Z",
+    "wheelResult": {
+      "buttonId": "actionBtn",
+      "controller": "file-writer",
+      "config": {
+        "fileWriterPath": "tmp/sticky-output.json"
+      },
+      "timestamp": 1768064729873
+    },
+    "application": "Unknown",
+    "config": {
+      "fileWriterPath": "tmp/sticky-output.json"
+    }
+  },
+  {
+    "timestamp": "2026-01-10T17:05:43.710Z",
+    "wheelResult": {
+      "buttonId": "actionBtn",
+      "controller": "file-writer",
+      "config": {
+        "fileWriterPath": "tmp/sticky-output.json"
+      },
+      "timestamp": 1768064743682
+    },
+    "application": "Unknown",
+    "config": {
+      "fileWriterPath": "tmp/sticky-output.json"
+    }
+  },
+  {
+    "timestamp": "2026-01-10T17:05:44.738Z",
+    "wheelResult": {
+      "buttonId": "actionBtn",
+      "controller": "file-writer",
+      "config": {
+        "fileWriterPath": "tmp/sticky-output.json"
+      },
+      "timestamp": 1768064744737
+    },
+    "application": "Unknown",
+    "config": {
+      "fileWriterPath": "tmp/sticky-output.json"
+    }
+  },
+  {
+    "timestamp": "2026-01-10T17:07:27.234Z",
+    "wheelResult": {
+      "buttonId": "actionBtn",
+      "controller": "file-writer",
+      "config": {
+        "fileWriterPath": "tmp/sticky-output.json"
+      },
+      "timestamp": 1768064847206
+    },
+    "application": "Unknown",
+    "config": {
+      "fileWriterPath": "tmp/sticky-output.json"
+    }
+  },
+  {
+    "timestamp": "2026-01-10T17:07:27.789Z",
+    "wheelResult": {
+      "buttonId": "actionBtn",
+      "controller": "file-writer",
+      "config": {
+        "fileWriterPath": "tmp/sticky-output.json"
+      },
+      "timestamp": 1768064847788
+    },
+    "application": "Unknown",
+    "config": {
+      "fileWriterPath": "tmp/sticky-output.json"
+    }
+  },
+  {
+    "timestamp": "2026-01-10T17:08:40.253Z",
+    "wheelResult": {
+      "buttonId": "actionBtn",
+      "controller": "file-writer",
+      "config": {
+        "fileWriterPath": "tmp/sticky-output.json"
+      },
+      "timestamp": 1768064920225
+    },
+    "application": "Unknown",
+    "config": {
+      "fileWriterPath": "tmp/sticky-output.json"
+    }
+  },
+  {
+    "timestamp": "2026-01-10T17:08:40.869Z",
+    "wheelResult": {
+      "buttonId": "actionBtn",
+      "controller": "file-writer",
+      "config": {
+        "fileWriterPath": "tmp/sticky-output.json"
+      },
+      "timestamp": 1768064920868
+    },
+    "application": "Unknown",
+    "config": {
+      "fileWriterPath": "tmp/sticky-output.json"
+    }
+  },
+  {
+    "timestamp": "2026-01-10T17:26:46.834Z",
+    "wheelResult": {
+      "buttonId": "actionBtn",
+      "controller": "file-writer",
+      "config": {
+        "fileWriterPath": "tmp/sticky-output.json"
+      },
+      "timestamp": 1768066006796
+    },
+    "application": "Unknown",
+    "config": {
+      "fileWriterPath": "tmp/sticky-output.json"
+    }
+  },
+  {
+    "timestamp": "2026-01-10T17:26:48.844Z",
+    "wheelResult": {
+      "buttonId": "actionBtn",
+      "controller": "file-writer",
+      "config": {
+        "fileWriterPath": "tmp/sticky-output.json"
+      },
+      "timestamp": 1768066008844
+    },
+    "application": "Unknown",
+    "config": {
+      "fileWriterPath": "tmp/sticky-output.json"
+    }
+  },
+  {
+    "timestamp": "2026-01-10T17:31:33.633Z",
+    "wheelResult": {
+      "buttonId": "actionBtn",
+      "controller": "file-writer",
+      "config": {
+        "fileWriterPath": "tmp/sticky-output.json"
+      },
+      "timestamp": 1768066293606
+    },
+    "application": "Unknown",
+    "config": {
+      "fileWriterPath": "tmp/sticky-output.json"
+    }
+  },
+  {
+    "timestamp": "2026-01-10T17:31:34.283Z",
+    "wheelResult": {
+      "buttonId": "actionBtn",
+      "controller": "file-writer",
+      "config": {
+        "fileWriterPath": "tmp/sticky-output.json"
+      },
+      "timestamp": 1768066294283
+    },
+    "application": "Unknown",
+    "config": {
+      "fileWriterPath": "tmp/sticky-output.json"
+    }
+  },
+  {
+    "timestamp": "2026-01-10T17:31:34.856Z",
+    "wheelResult": {
+      "buttonId": "actionBtn",
+      "controller": "file-writer",
+      "config": {
+        "fileWriterPath": "tmp/sticky-output.json"
+      },
+      "timestamp": 1768066294856
+    },
+    "application": "Unknown",
+    "config": {
+      "fileWriterPath": "tmp/sticky-output.json"
+    }
+  },
+  {
+    "timestamp": "2026-01-10T17:31:35.219Z",
+    "wheelResult": {
+      "buttonId": "actionBtn",
+      "controller": "file-writer",
+      "config": {
+        "fileWriterPath": "tmp/sticky-output.json"
+      },
+      "timestamp": 1768066295219
+    },
+    "application": "Unknown",
+    "config": {
+      "fileWriterPath": "tmp/sticky-output.json"
+    }
   }
 ]

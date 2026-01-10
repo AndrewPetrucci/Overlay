@@ -30,9 +30,9 @@ body {
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    padding: 40px;
     text-align: center;
     color: white;
+    overflow-y: auto;
 }
 
 .content h1 {
@@ -69,6 +69,18 @@ body {
 
 .action-btn:active {
     transform: scale(0.95);
+}
+
+.file-content {
+    min-height: 100%;
+    width: 100%;
+    background: rgba(20, 20, 40, 0.7);
+    border-radius: 8px;
+    padding: 24px;
+    color: #fff;
+    font-size: 16px;
+    text-align: left;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
 }
 
 .control-panel {

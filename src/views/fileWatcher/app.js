@@ -8,7 +8,6 @@
 class FileWatcherApp {
     constructor() {
         console.log('[FileWatcherApp] Initializing...');
-        this.dataFile = 'tmp/sticky-output.json';
         this.fileContent = document.getElementById('fileContent');
         this.setupEventListeners();
         this.loadFileContent();
@@ -38,6 +37,10 @@ class FileWatcherApp {
                 } else {
                     this.fileContent.textContent = data.content;
                 }
+                // Scroll to bottom after updating content
+                setTimeout(() => {
+                    this.fileContent.parentElement.scrollTop = this.fileContent.scrollHeight;
+                }, 0);
             });
         }
     }
@@ -65,7 +68,6 @@ class FileWatcherApp {
     loadFileContent() {
         if (window.electron) {
             window.electron.sendMessage('read-file', {
-                filePath: this.dataFile,
                 timestamp: Date.now()
             });
         }

@@ -21,16 +21,16 @@ class FileWatcherQueueManager extends SharedQueueManager {
      * Setup IPC listeners for file operations
      */
     setupIpcListeners() {
-        ipcMain.on('read-file', (event, fileData) => {
+        ipcMain.on('read-file', (event) => {
             try {
-                const filePath = path.join(process.cwd(), fileData.filePath);
+                const filePath = path.join(process.cwd(), this.windowConfig.dataFile);
                 console.log(`[FileWatcherQueueManager] Reading file: ${filePath}`);
 
                 if (!fs.existsSync(filePath)) {
                     console.warn(`[FileWatcherQueueManager] File not found: ${filePath}`);
                     event.sender.send('file-content', {
                         error: 'File not found',
-                        filePath: fileData.filePath
+                        filePath: filePath
                     });
                     return;
                 }
@@ -47,7 +47,7 @@ class FileWatcherQueueManager extends SharedQueueManager {
 
                 event.sender.send('file-content', {
                     content: parsedContent,
-                    filePath: fileData.filePath,
+                    filePath: filePath,
                     timestamp: Date.now()
                 });
             } catch (error) {

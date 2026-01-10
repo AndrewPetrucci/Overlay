@@ -26,6 +26,24 @@
         </div>
     </div>
 
+    <script>
+    // Inject config from main process
+    // This will be replaced by main.js when creating the window
+    window.dataFile = undefined;
+    try {
+        // Electron 12+ contextBridge: use preload to inject config
+        if (window.electron && window.electron.getConfig) {
+            window.electron.getConfig().then(cfg => {
+                if (cfg && cfg.windows) {
+                    const fileWatcherCfg = cfg.windows.find(w => w.id === 'fileWatcher');
+                    if (fileWatcherCfg && fileWatcherCfg.dataFile) {
+                        window.dataFile = fileWatcherCfg.dataFile;
+                    }
+                }
+            });
+        }
+    } catch (e) {}
+    </script>
     <script src="../../shared/window-bar.js"></script>
     <script src="app.js"></script>
 </body>
