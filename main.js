@@ -12,6 +12,7 @@ let uniqueApplications = new Set(); // Move to global scope
 
 // Queue managers for different window types
 const queueManagers = new Map(); // Map of windowType -> manager instance
+const windowConfigs = new Map(); // Map of windowType -> {windowId, config}
 
 // Get auto-spin setting from environment (default: false)
 // Set AUTO_SPIN=true to enable
@@ -94,7 +95,7 @@ function initializeQueueManagers(windowsConfig, wheelOptions, appConfigs) {
 
         try {
             // Try to load the queue manager for this window type
-            const queueManagerPath = path.join(__dirname, `src/windows/${windowType}/queue-manager`);
+            const queueManagerPath = path.join(__dirname, `src/views/${windowType}/queue-manager`);
 
             // Check if the queue manager file exists
             if (!fs.existsSync(queueManagerPath + '.js')) {
@@ -214,6 +215,7 @@ app.on('ready', () => {
         if (windowConfig.enabled) {
             const windowId = createWindow(windowConfig.html);
             createdWindows.push({ id: windowId, config: windowConfig });
+            windowConfigs.set(windowConfig.id, { windowId: windowId, config: windowConfig });
             console.log(`[Main] Created window "${windowConfig.name}" (ID: ${windowId}) from ${windowConfig.html}`);
 
             // Apply position offset if configured
@@ -428,12 +430,47 @@ ipcMain.on('button-click', (event, clickData) => {
     try {
         console.log('Button clicked! Data:', clickData);
 
-        // Get the boilerplate queue manager
-        const boilerplateQueueManager = queueManagers.get('boilerplate');
-        if (boilerplateQueueManager) {
-            boilerplateQueueManager.handleButtonClick(clickData.buttonId, clickData);
+        // Find which window sent this event by matching webContents ID
+        const sendingWebContents = event.sender;
+        let windowType = null;
+
+        for (const [winType, queueMgr] of queueManagers.entries()) {
+            // queueManagers are keyed by windowType, check if any active window matches
+            const windowConfig = windowConfigs.get(winType);
+            if (windowConfig && windowConfig.windowId) {
+                const win = BrowserWindow.fromId(windowConfig.windowId);
+                if (win && win.webContents === sendingWebContents) {
+                    windowType = winType;
+                    break;
+                }
+            }
+        }
+
+        if (windowType) {
+            const queueManager = queueManagers.get(windowType);
+            if (queueManager) {
+                queueManager.handleButtonClick(clickData.buttonId, clickData);
+
+                // Notify fileWatcher window if a sticky button was clicked
+                if (windowType === 'sticky') {
+                    const fileWatcherConfig = windowConfigs.get('fileWatcher');
+                    if (fileWatcherConfig && fileWatcherConfig.windowId) {
+                        const fileWatcherWindow = BrowserWindow.fromId(fileWatcherConfig.windowId);
+                        if (fileWatcherWindow && !fileWatcherWindow.isDestroyed()) {
+                            fileWatcherWindow.webContents.send('file-updated', {
+                                trigger: 'sticky-action',
+                                buttonId: clickData.buttonId,
+                                timestamp: clickData.timestamp
+                            });
+                            console.log('[Main] Notified fileWatcher of sticky action');
+                        }
+                    }
+                }
+            } else {
+                console.warn(`Queue manager not initialized for window type: ${windowType}`);
+            }
         } else {
-            console.warn('Boilerplate queue manager not initialized');
+            console.warn('Could not determine which window sent the button-click event');
         }
     } catch (error) {
         console.error('Error handling button-click:', error);

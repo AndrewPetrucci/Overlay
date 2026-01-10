@@ -3,8 +3,8 @@
         {
             "id": "wheel",
             "name": "Twitch Wheel",
-            "html": "src/windows/wheel/index.html",
-            "enabled": true,
+            "html": "src/views/wheel/index.html",
+            "enabled": false,
             "position": {
                 "offset": 0,
                 "xOffset": 0,
@@ -107,8 +107,8 @@
         {
             "id": "boilerplate",
             "name": "Boilerplate Window",
-            "html": "src/windows/boilerplate/index.html",
-            "enabled": true,
+            "html": "src/views/boilerplate/index.html",
+            "enabled": false,
             "position": {
                 "offset": 1,
                 "xOffset": -610,
@@ -121,6 +121,38 @@
                     "config": {}
                 }
             ]
+        },
+        {
+            "id": "sticky",
+            "name": "Sticky Window",
+            "html": "src/views/sticky/index.html",
+            "enabled": true,
+            "position": {
+                "offset": 0,
+                "xOffset": 0,
+                "yOffset": 0
+            },
+            "buttonOptions": [
+                {
+                    "id": "actionBtn",
+                    "controller": "file-writer",
+                    "config": {
+                        "fileWriterPath": "tmp/sticky-output.json"
+                    }
+                }
+            ]
+        },
+        {
+            "id": "fileWatcher",
+            "name": "File Watcher",
+            "html": "src/views/fileWatcher/index.html",
+            "enabled": true,
+            "position": {
+                "offset": 2,
+                "xOffset": 0,
+                "yOffset": 0
+            },
+            "event": ""
         }
     ],
     "defaults": {

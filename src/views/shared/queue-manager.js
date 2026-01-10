@@ -1,5 +1,6 @@
 const { spawn } = require('child_process');
 const path = require('path');
+const { BrowserWindow } = require('electron');
 
 /**
  * Base class for all window queue managers
@@ -57,6 +58,26 @@ class SharedQueueManager {
                 });
             } else if (message.type === 'queue-empty') {
                 console.log(`[${this.constructor.name}] Queue empty: "${queueName}"`);
+            } else if (message.type === 'file-writer-event') {
+                // Broadcast file-writer-event to all windows
+                console.log(`[${this.constructor.name}] Received file-writer-event from worker, broadcasting to windows`);
+                try {
+                    const allWindows = BrowserWindow.getAllWindows();
+                    allWindows.forEach(win => {
+                        if (win && !win.isDestroyed()) {
+                            win.webContents.send('file-writer-event', {
+                                type: 'file-written',
+                                filePath: message.filePath,
+                                filename: message.filename,
+                                timestamp: message.timestamp,
+                                entry: message.entry
+                            });
+                        }
+                    });
+                    console.log(`[${this.constructor.name}] Broadcast file-writer-event to ${allWindows.length} window(s)`);
+                } catch (err) {
+                    console.error(`[${this.constructor.name}] Error broadcasting file-writer-event: ${err.message}`);
+                }
             }
         });
 

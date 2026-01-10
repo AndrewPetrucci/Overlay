@@ -24,5 +24,10 @@ contextBridge.exposeInMainWorld('electron', {
     getModConfig: (modKey) => ipcRenderer.sendSync('get-mod-config', modKey),
     setModEnabled: (modKey, enabled) => ipcRenderer.sendSync('set-mod-enabled', { modKey, enabled }),
     addWheelMapping: (wheelResult, modKey) => ipcRenderer.sendSync('add-wheel-mapping', { wheelResult, modKey }),
-    removeWheelMapping: (wheelResult, modKey) => ipcRenderer.sendSync('remove-wheel-mapping', { wheelResult, modKey })
+    removeWheelMapping: (wheelResult, modKey) => ipcRenderer.sendSync('remove-wheel-mapping', { wheelResult, modKey }),
+
+    // File Watcher
+    onFileUpdated: (callback) => ipcRenderer.on('file-updated', (event, data) => callback(data)),
+    onFileContent: (callback) => ipcRenderer.on('file-content', (event, data) => callback(data)),
+    onFileWriterEvent: (callback) => ipcRenderer.on('file-writer-event', (event, data) => callback(data))
 });

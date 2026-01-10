@@ -51,10 +51,10 @@ A template for creating new window implementations.
 4. Update `main.js` to create your window:
    ```javascript
    const windowId1 = createWindow();
-   mainWindow.loadFile('src/windows/your-window/index.html');
+   mainWindow.loadFile('src/views/your-window/index.html');
    
    const windowId2 = createWindow();
-   mainWindow.loadFile('src/windows/another-window/index.html');
+   mainWindow.loadFile('src/views/another-window/index.html');
    ```
 
 ## Common Patterns
@@ -126,6 +126,61 @@ window.electron.moveWindowTo(x, y);
 - **Log initialization** - Use console.log with window names for debugging
 - **Consistent styling** - Use the color scheme from `styles.css`
 - **Error handling** - Gracefully handle errors in async operations
+
+## IPC Listeners
+
+IPC listeners (Electron inter-process communication handlers) live in **`queue-manager.js`** for each view.
+
+### Pattern
+
+Each view's `queue-manager.js` extends `SharedQueueManager` and can set up IPC listeners in its constructor:
+
+```javascript
+class YourWindowQueueManager extends SharedQueueManager {
+    constructor(windowConfig = {}) {
+        super(windowConfig);
+        this.setupIpcListeners();  // Set up IPC listeners
+    }
+
+    setupIpcListeners() {
+        ipcMain.on('your-event', (event, data) => {
+            // Handle the event
+            event.sender.send('response-event', result);
+        });
+    }
+}
+```
+
+### Example: File Watcher
+
+The `fileWatcher` view demonstrates this pattern:
+
+**Location:** `fileWatcher/queue-manager.js`
+
+```javascript
+setupIpcListeners() {
+    ipcMain.on('read-file', (event, fileData) => {
+        // Read file and send back content
+        event.sender.send('file-content', { content, filePath });
+    });
+}
+```
+
+When the fileWatcher window is initialized (via `windows-config.json`), its queue manager automatically sets up the IPC listener.
+
+### Adding New IPC Handlers
+
+1. **Edit your view's `queue-manager.js`**
+2. **Add `setupIpcListeners()` method**
+3. **Register handlers with `ipcMain.on()`**
+4. **Queue manager is initialized when window is created** - No additional setup needed
+
+### Important Notes
+
+- IPC listeners are automatically set up when the queue manager is instantiated
+- Each view owns its own IPC listeners - keep them in the view's folder
+- Use descriptive event names that indicate the window context
+- Always log handler creation and events for debugging
 
 ## Styling Conventions
 

@@ -417,13 +417,13 @@ The overlay uses a multi-window queue management system for handling commands as
 
 ### Queue Structure
 
-**Base Class:** `src/windows/shared/queue-manager.js`
+**Base Class:** `src/views/shared/queue-manager.js`
 - Manages IPC queues for each window
 - Spawns worker processes on-demand
 - Handles inter-process communication
 - Distributes configurations to workers
 
-**Worker Process:** `src/windows/shared/queue-worker.js`
+**Worker Process:** `src/views/shared/queue-worker.js`
 - Runs as a child process for each queue
 - Processes items asynchronously
 - Loads and executes controller modules dynamically

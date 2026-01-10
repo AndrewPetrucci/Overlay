@@ -17,7 +17,9 @@ function executeController(wheelResult, applicationConfigs) {
                 fs.mkdirSync(tmpDir, { recursive: true });
             }
 
-            const filename = 'controller-output.json';
+            // Get filename from config, default to 'controller-output.json'
+            const fileWriterPath = wheelResult.config?.fileWriterPath || 'controller-output.json';
+            const filename = path.basename(fileWriterPath);
             const filepath = path.join(tmpDir, filename);
 
             // Prepare the data to write with timestamp
@@ -56,6 +58,23 @@ function executeController(wheelResult, applicationConfigs) {
                         reject(err);
                     } else {
                         console.log(`[FileWriter] Successfully appended to: ${filepath}`);
+
+                        // Emit event to parent process (queue manager) to notify fileWatcher
+                        if (process.send) {
+                            try {
+                                process.send({
+                                    type: 'file-writer-event',
+                                    filePath: filepath,
+                                    filename: filename,
+                                    timestamp: Date.now(),
+                                    entry: logEntry
+                                });
+                                console.log(`[FileWriter] Sent file-writer-event to parent process`);
+                            } catch (sendErr) {
+                                console.warn(`[FileWriter] Could not send event to parent: ${sendErr.message}`);
+                            }
+                        }
+
                         resolve();
                     }
                 }

@@ -1,0 +1,277 @@
+[
+  {
+    "timestamp": "2026-01-10T16:20:47.451Z",
+    "wheelResult": {
+      "buttonId": "actionBtn",
+      "controller": "file-writer",
+      "config": {},
+      "timestamp": 1768062047423
+    },
+    "application": "Unknown",
+    "config": {}
+  },
+  {
+    "timestamp": "2026-01-10T16:24:37.035Z",
+    "wheelResult": {
+      "buttonId": "actionBtn",
+      "controller": "file-writer",
+      "config": {},
+      "timestamp": 1768062277007
+    },
+    "application": "Unknown",
+    "config": {}
+  },
+  {
+    "timestamp": "2026-01-10T16:24:38.494Z",
+    "wheelResult": {
+      "buttonId": "actionBtn",
+      "controller": "file-writer",
+      "config": {},
+      "timestamp": 1768062278494
+    },
+    "application": "Unknown",
+    "config": {}
+  },
+  {
+    "timestamp": "2026-01-10T16:24:41.629Z",
+    "wheelResult": {
+      "buttonId": "actionBtn",
+      "controller": "file-writer",
+      "config": {},
+      "timestamp": 1768062281629
+    },
+    "application": "Unknown",
+    "config": {}
+  },
+  {
+    "timestamp": "2026-01-10T16:24:47.130Z",
+    "wheelResult": {
+      "buttonId": "actionBtn",
+      "controller": "file-writer",
+      "config": {},
+      "timestamp": 1768062287130
+    },
+    "application": "Unknown",
+    "config": {}
+  },
+  {
+    "timestamp": "2026-01-10T16:24:56.337Z",
+    "wheelResult": {
+      "buttonId": "actionBtn",
+      "controller": "file-writer",
+      "config": {},
+      "timestamp": 1768062296336
+    },
+    "application": "Unknown",
+    "config": {}
+  },
+  {
+    "timestamp": "2026-01-10T16:24:57.256Z",
+    "wheelResult": {
+      "buttonId": "actionBtn",
+      "controller": "file-writer",
+      "config": {},
+      "timestamp": 1768062297255
+    },
+    "application": "Unknown",
+    "config": {}
+  },
+  {
+    "timestamp": "2026-01-10T16:31:17.072Z",
+    "wheelResult": {
+      "buttonId": "actionBtn",
+      "controller": "file-writer",
+      "config": {},
+      "timestamp": 1768062677044
+    },
+    "application": "Unknown",
+    "config": {}
+  },
+  {
+    "timestamp": "2026-01-10T16:31:18.831Z",
+    "wheelResult": {
+      "buttonId": "actionBtn",
+      "controller": "file-writer",
+      "config": {},
+      "timestamp": 1768062678831
+    },
+    "application": "Unknown",
+    "config": {}
+  },
+  {
+    "timestamp": "2026-01-10T16:31:20.205Z",
+    "wheelResult": {
+      "buttonId": "actionBtn",
+      "controller": "file-writer",
+      "config": {},
+      "timestamp": 1768062680205
+    },
+    "application": "Unknown",
+    "config": {}
+  },
+  {
+    "timestamp": "2026-01-10T16:31:21.621Z",
+    "wheelResult": {
+      "buttonId": "actionBtn",
+      "controller": "file-writer",
+      "config": {},
+      "timestamp": 1768062681622
+    },
+    "application": "Unknown",
+    "config": {}
+  },
+  {
+    "timestamp": "2026-01-10T16:31:23.290Z",
+    "wheelResult": {
+      "buttonId": "actionBtn",
+      "controller": "file-writer",
+      "config": {},
+      "timestamp": 1768062683290
+    },
+    "application": "Unknown",
+    "config": {}
+  },
+  {
+    "timestamp": "2026-01-10T16:31:24.574Z",
+    "wheelResult": {
+      "buttonId": "actionBtn",
+      "controller": "file-writer",
+      "config": {},
+      "timestamp": 1768062684575
+    },
+    "application": "Unknown",
+    "config": {}
+  },
+  {
+    "timestamp": "2026-01-10T16:31:26.009Z",
+    "wheelResult": {
+      "buttonId": "actionBtn",
+      "controller": "file-writer",
+      "config": {},
+      "timestamp": 1768062686009
+    },
+    "application": "Unknown",
+    "config": {}
+  },
+  {
+    "timestamp": "2026-01-10T16:31:27.765Z",
+    "wheelResult": {
+      "buttonId": "actionBtn",
+      "controller": "file-writer",
+      "config": {},
+      "timestamp": 1768062687766
+    },
+    "application": "Unknown",
+    "config": {}
+  },
+  {
+    "timestamp": "2026-01-10T16:31:33.242Z",
+    "wheelResult": {
+      "buttonId": "actionBtn",
+      "controller": "file-writer",
+      "config": {},
+      "timestamp": 1768062693242
+    },
+    "application": "Unknown",
+    "config": {}
+  },
+  {
+    "timestamp": "2026-01-10T16:31:34.377Z",
+    "wheelResult": {
+      "buttonId": "actionBtn",
+      "controller": "file-writer",
+      "config": {},
+      "timestamp": 1768062694378
+    },
+    "application": "Unknown",
+    "config": {}
+  },
+  {
+    "timestamp": "2026-01-10T16:31:35.485Z",
+    "wheelResult": {
+      "buttonId": "actionBtn",
+      "controller": "file-writer",
+      "config": {},
+      "timestamp": 1768062695485
+    },
+    "application": "Unknown",
+    "config": {}
+  },
+  {
+    "timestamp": "2026-01-10T16:31:36.645Z",
+    "wheelResult": {
+      "buttonId": "actionBtn",
+      "controller": "file-writer",
+      "config": {},
+      "timestamp": 1768062696645
+    },
+    "application": "Unknown",
+    "config": {}
+  },
+  {
+    "timestamp": "2026-01-10T16:37:00.060Z",
+    "wheelResult": {
+      "buttonId": "actionBtn",
+      "controller": "file-writer",
+      "config": {},
+      "timestamp": 1768063020030
+    },
+    "application": "Unknown",
+    "config": {}
+  },
+  {
+    "timestamp": "2026-01-10T16:38:14.734Z",
+    "wheelResult": {
+      "buttonId": "actionBtn",
+      "controller": "file-writer",
+      "config": {},
+      "timestamp": 1768063094707
+    },
+    "application": "Unknown",
+    "config": {}
+  },
+  {
+    "timestamp": "2026-01-10T16:38:22.332Z",
+    "wheelResult": {
+      "buttonId": "actionBtn",
+      "controller": "file-writer",
+      "config": {},
+      "timestamp": 1768063102331
+    },
+    "application": "Unknown",
+    "config": {}
+  },
+  {
+    "timestamp": "2026-01-10T16:38:24.800Z",
+    "wheelResult": {
+      "buttonId": "actionBtn",
+      "controller": "file-writer",
+      "config": {},
+      "timestamp": 1768063104800
+    },
+    "application": "Unknown",
+    "config": {}
+  },
+  {
+    "timestamp": "2026-01-10T16:40:50.867Z",
+    "wheelResult": {
+      "buttonId": "actionBtn",
+      "controller": "file-writer",
+      "config": {},
+      "timestamp": 1768063250867
+    },
+    "application": "Unknown",
+    "config": {}
+  },
+  {
+    "timestamp": "2026-01-10T16:41:11.206Z",
+    "wheelResult": {
+      "buttonId": "actionBtn",
+      "controller": "file-writer",
+      "config": {},
+      "timestamp": 1768063271206
+    },
+    "application": "Unknown",
+    "config": {}
+  }
+]
