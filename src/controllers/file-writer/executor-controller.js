@@ -3,11 +3,11 @@ const path = require('path');
 
 /**
  * Execute a file writer controller that writes wheel results to a file in the temp folder
- * @param {object} wheelResult - The wheel result object with config
+ * @param {object} eventData - The wheel result object with config
  * @param {object} applicationConfigs - Map of all application configurations
  * @returns {Promise<void>}
  */
-function executeController(wheelResult, applicationConfigs) {
+function executeController(eventData, applicationConfigs) {
     return new Promise((resolve, reject) => {
         try {
             const tmpDir = path.join(process.env.USERPROFILE || process.env.HOME, 'Documents', 'Overlay', 'tmp');
@@ -18,16 +18,14 @@ function executeController(wheelResult, applicationConfigs) {
             }
 
             // Get filename from config, default to 'controller-output.json'
-            const fileWriterPath = wheelResult.config?.fileWriterPath || 'controller-output.json';
+            const fileWriterPath = eventData.config?.fileWriterPath || 'controller-output.json';
             const filename = path.basename(fileWriterPath);
             const filepath = path.join(tmpDir, filename);
 
             // Prepare the data to write with timestamp
             const logEntry = {
                 timestamp: new Date().toISOString(),
-                wheelResult: wheelResult,
-                application: wheelResult.application || 'Unknown',
-                config: wheelResult.config || {}
+                data: eventData
             };
 
             // Read existing file or create new array
