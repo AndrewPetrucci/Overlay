@@ -84,6 +84,15 @@ function executeController(eventData, applicationConfigs) {
     });
 }
 
+
+/**
+ * Initialize the File Writer controller (empty placeholder)
+ */
+function initializeController() {
+    // TODO: Add initialization logic if needed
+}
+
 module.exports = {
-    executeController
+    executeController,
+    initializeController
 };

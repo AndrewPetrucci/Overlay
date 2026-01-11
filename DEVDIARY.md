@@ -49,3 +49,12 @@ Here is the layout
 3. the overlayS pulral! These electron applications are intended to be quick and snappy ui elements that run independently of each other. How you sequence monitor processes to grab items from queues and process them is up to the plugin creator. (terms are still in motion. Will do more research)
 
 now thats a lot of words. I'm going to be reskinning the wheel in the short term to something I'm more proud of. After that I'll work on splitting the electron app into a server and implementing different queue logic. Some schemas will have to change but so is life. I want to wrap up the next section of development by creating a second electron app that sits over notepad and provides a list of math operations and custom functions. The test bench for this project will be both the old electron app and the new one running at the same time and sending commands to notepad.
+
+
+### 1/11/2026
+I've spent that last 2 days pushing the project to be more framework like. I think there is potential to forge the project into the scalable open source workstation I dream it can be. To prove that this project has legs I'm going to build a scalable ui around ms paint. it seems to be a good baseline considering everyone has it installed on windows by default. Youtube channel got axed and I'm going through the appeal process.
+
+#### Development Planning
+To prove that the project has legs I am going to start running at two different implementations.
+1. skyrim wheel example - this is just a lot of manual testing against skyrim and working on the wheel ui
+2. I need to add a bunch of utility around target applications changing state. (minimize, maximize, close, resize,move) Maybe have one applicationMetadataUpdate method.

@@ -21,7 +21,7 @@ const AUTO_SPIN = process.env.AUTO_SPIN === 'true' || process.argv.includes('--e
 const WINDOW_WIDTH = 600;
 const WINDOW_HEIGHT = 600;
 
-function createWindow(htmlFile = 'src/windows/wheel/index.html') {
+function createWindow(htmlFile = 'src/windows/boilderplate/index.html') {
     const window = new BrowserWindow({
         width: WINDOW_WIDTH,
         height: WINDOW_HEIGHT,
@@ -51,13 +51,8 @@ function createWindow(htmlFile = 'src/windows/wheel/index.html') {
 
     window.loadFile(htmlFile);
 
-    // Force window to stay at exact size (set after load to ensure it takes effect)
-    window.webContents.on('did-finish-load', () => {
-        window.setMinimumSize(WINDOW_WIDTH, WINDOW_HEIGHT);
-        window.setMaximumSize(WINDOW_WIDTH, WINDOW_HEIGHT);
-    });
-
     // Start with mouse events ignored so clicks pass through
+    // todo: this needs to be handled at the view level.
     window.setIgnoreMouseEvents(true, { forward: true });
 
     // Open DevTools in dev mode
@@ -76,10 +71,9 @@ function createWindow(htmlFile = 'src/windows/wheel/index.html') {
 /**
  * Dynamically load and initialize queue managers based on window configuration
  * @param {object} windowsConfig - Windows configuration object
- * @param {object} wheelOptions - All wheel options
  * @param {object} appConfigs - Application configurations
  */
-function initializeQueueManagers(windowsConfig, wheelOptions, appConfigs) {
+function initializeQueueManagers(windowsConfig, appConfigs) {
     if (!windowsConfig || !windowsConfig.windows) {
         console.log('[QueueManager] No windows configuration found');
         return;
@@ -271,12 +265,6 @@ app.on('ready', () => {
         }
     });
 
-    // Use first discovered application as reference (or null if none)
-    gameConfig = Object.values(applicationConfigs)[0] || {
-        wheelOptions: allWheelOptions,
-        executorScript: null
-    };
-
     console.log(`[Main] Loaded configuration for ${uniqueApplications.size} application(s): ${Array.from(uniqueApplications).join(', ')}`);
     console.log(`[Main] Total wheel options: ${allWheelOptions.length}`);
     console.log(`[Main] System is application-agnostic - applications defined by wheel-options.json`);
@@ -343,7 +331,7 @@ app.on('ready', () => {
     }
 
     // Initialize queue managers based on window configuration
-    initializeQueueManagers(windowsConfig, allWheelOptions, applicationConfigs);
+    initializeQueueManagers(windowsConfig, applicationConfigs);
 
     // Initialize Twitch Client (optional - skip if credentials missing)
     try {
@@ -393,9 +381,7 @@ app.on('window-all-closed', () => {
 });
 
 app.on('activate', () => {
-    // if (Object.keys(windows).length === 0) {
-    //     createWindow('src/windows/wheel/index.html');
-    // }
+    
 });
 
 // IPC Handlers

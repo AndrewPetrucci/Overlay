@@ -8,14 +8,11 @@
 const { spawn } = require('child_process');
 const fs = require('fs');
 const path = require('path');
-const { execSync } = require('child_process');
 
 // Configuration
 const TEST_TIMEOUT = 60000; // 1 minute total
 const NOTEPAD_START_WAIT = 2000; // Wait for notepad to start
 const WHEEL_SPIN_WAIT = 35000; // Wait for auto-spin (which happens every 30 seconds)
-const TEXT_DETECTION_WAIT = 5000; // Wait for text to appear
-const POLLING_INTERVAL = 500; // Check for text every 500ms
 
 class NotepadWheelTester {
     constructor() {

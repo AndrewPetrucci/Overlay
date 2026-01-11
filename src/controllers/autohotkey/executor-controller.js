@@ -47,6 +47,15 @@ function executeController(wheelResult, applicationConfigs) {
     });
 }
 
+
+/**
+ * Initialize the AutoHotkey controller (empty placeholder)
+ */
+function initializeController() {
+    // TODO: Add initialization logic if needed
+}
+
 module.exports = {
-    executeController
+    executeController,
+    initializeController
 };
