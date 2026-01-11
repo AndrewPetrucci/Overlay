@@ -7,5 +7,4 @@ build/
 .vscode/settings.json
 tmp/test-screenshots/
 tmp/test-text/
-overlay-data.json
-tmp/overlay-data.json
+tmp/*.json

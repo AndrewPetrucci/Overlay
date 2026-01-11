@@ -1,3 +1,17 @@
+# Overlay/Event-Driven Electron Framework
+
+This project is a **framework for building overlay and event-driven Electron applications**. It provides a modular, extensible architecture for creating custom overlays, controllers, and integrations, with a focus on IPC queue management and event propagation.
+
+## Key Framework Features
+
+- **Extensible Queue Management:** Base class (`SharedQueueManager`) with hooks for custom event handling and queue logic. Developers can extend this class to create new overlay views or controllers.
+- **Prescribed Architecture:** Organized folder structure (`applications`, `controllers`, `views`) and boilerplate templates for rapid development and maintainability.
+- **IPC Event System:** Abstracted inter-process communication and queueing for asynchronous event handling across multiple windows and controllers.
+- **Reusable Components:** Designed for reuse—add new overlays, controllers, or integrations by extending the provided base classes and following the established patterns.
+- **Abstraction:** Lower-level details of IPC, file management, and event propagation are hidden, allowing developers to focus on high-level application logic.
+
+---
+
 # Skyrim Twitch Wheel Overlay
 
 An Electron-based overlay application that displays an interactive spinning wheel controlled by Twitch chat events. **Game-agnostic framework** with support for multiple games.

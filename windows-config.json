@@ -4,7 +4,7 @@
             "id": "wheel",
             "name": "Twitch Wheel",
             "html": "src/views/wheel/index.html",
-            "enabled": false,
+            "enabled": true,
             "position": {
                 "offset": 0,
                 "xOffset": 0,
