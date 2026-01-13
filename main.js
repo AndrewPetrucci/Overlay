@@ -263,37 +263,38 @@ app.on('ready', () => {
 
     // Create windows from config
     const createdWindows = [];
-    windowsConfig.windows.forEach((windowConfig, index) => {
-        if (windowConfig.enabled) {
-            const windowId = createWindow(windowConfig);
-            createdWindows.push({ id: windowId, config: windowConfig });
-            windowConfigs.set(windowConfig.id, { windowId: windowId, config: windowConfig });
-            console.log(`[Main] Created window "${windowConfig.name}" (ID: ${windowId}) from ${windowConfig.html}`);
+    windowsConfig.windows.forEach((config, index) => {
+        if (config.enabled) {
+            const windowId = createWindow(config);
+            createdWindows.push({ id: windowId, config: config });
+            windowConfigs.set(config.id, { windowId: windowId, config: config });
+            console.log(`[Main] Created window "${config.name}" (ID: ${windowId}) from ${config.html}`);
 
             // Apply position offset if configured
             const window = windows[windowId];
-            if (window && windowConfig.position && (windowConfig.position.xOffset !== 0 || windowConfig.position.yOffset !== 0)) {
+            if (window && config.position && (config.position.xOffset !== 0 || config.position.yOffset !== 0)) {
                 window.webContents.once('did-finish-load', () => {
                     const bounds = window.getBounds();
                     window.setBounds({
-                        x: bounds.x + windowConfig.position.xOffset,
-                        y: bounds.y + windowConfig.position.yOffset,
+                        x: bounds.x + config.position.xOffset,
+                        y: bounds.y + config.position.yOffset,
                         width: bounds.width,
                         height: bounds.height
                     });
-                    console.log(`[Main] Positioned window "${windowConfig.name}" at offset (${windowConfig.position.xOffset}, ${windowConfig.position.yOffset})`);
+
+                    console.log(`[Main] Positioned window "${config.name}" at offset (${config.position.xOffset}, ${config.position.yOffset})`);
                 });
             }
 
             // Pass wheel options to wheel window via IPC
-            if (windowConfig.id === 'wheel' && windowConfig?.options?.wheel) {
+            if (config.id === 'wheel' && config?.options?.wheel) {
                 window.webContents.once('did-finish-load', () => {
-                    window.webContents.send('load-wheel-options', windowConfig?.options?.wheel);
-                    console.log(`[Main] Sent ${windowConfig?.options?.wheel.length} wheel options to wheel window`);
+                    window.webContents.send('load-wheel-options', config?.options?.wheel);
+                    console.log(`[Main] Sent ${config?.options?.wheel.length} wheel options to wheel window`);
                 });
             }
         } else {
-            console.log(`[Main] Window "${windowConfig.name}" is disabled, skipping creation`);
+            console.log(`[Main] Window "${config.name}" is disabled, skipping creation`);
         }
     });
 
