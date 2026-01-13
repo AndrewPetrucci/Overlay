@@ -83,16 +83,12 @@ function createWindow(windowConfig = { html: 'src/windows/boilderplate/index.htm
     const window = new BrowserWindow({
         width: WINDOW_WIDTH,
         height: WINDOW_HEIGHT,
-        minWidth: WINDOW_WIDTH,
-        minHeight: WINDOW_HEIGHT,
-        maxWidth: WINDOW_WIDTH,
-        maxHeight: WINDOW_HEIGHT,
         x: require('electron').screen.getPrimaryDisplay().workAreaSize.width - WINDOW_WIDTH,
         y: require('electron').screen.getPrimaryDisplay().workAreaSize.height - WINDOW_HEIGHT,
-        alwaysOnTop: true,
-        transparent: true,
-        frame: false,
-        resizable: false,
+        alwaysOnTop: false,
+        transparent: false,
+        frame: true,
+        resizable: true,
         skipTaskbar: false,
         icon: path.join(__dirname, 'assets/icon.png'),
         webPreferences: {
@@ -131,13 +127,13 @@ function createWindow(windowConfig = { html: 'src/windows/boilderplate/index.htm
  * @param {object} windowsConfig - Windows configuration object
  * @param {object} appConfigs - Application configurations
  */
-function initializeQueueManagers(windowsConfig, appConfigs) {
-    if (!windowsConfig || !windowsConfig.windows) {
+function initializeQueueManagers(ecosystemConfig, appConfigs) {
+    if (!ecosystemConfig || !ecosystemConfig.windows) {
         console.log('[QueueManager] No windows configuration found');
         return;
     }
 
-    windowsConfig.windows.forEach((windowConfig) => {
+    ecosystemConfig.windows.forEach((windowConfig) => {
         // Only initialize queue managers for enabled windows
         if (!windowConfig.enabled) {
             return;
@@ -180,10 +176,10 @@ function registerIpcHandlers() {
 
     // Listen for messages from renderer about interactive elements
     ipcMain.on('mouse-over-interactive', (event, isOver) => {
-        const window = getWindowFromEvent(event);
-        if (window) {
-            window.setIgnoreMouseEvents(!isOver, { forward: true });
-        }
+        // const window = getWindowFromEvent(event);
+        // if (window) {
+        //     window.setIgnoreMouseEvents(!isOver, { forward: true });
+        // }
     });
 
     ipcMain.on('move-window', (event, { deltaX, deltaY }) => {
@@ -249,57 +245,43 @@ function registerIpcHandlers() {
 app.on('ready', () => {
     registerIpcHandlers();
 
-    // Load windows configuration
-    const windowsConfigPath = path.join(__dirname, 'windows-config.json');
-    let windowsConfig = { windows: [] };
+    // Load ecosystem configuration
+    const ecosystemConfigPath = path.join(__dirname, 'windows-config.json');
+    let ecosystemConfig = { windows: [] };
 
     try {
-        const configContent = fs.readFileSync(windowsConfigPath, 'utf-8');
-        windowsConfig = JSON.parse(configContent);
-        console.log(`[Main] Loaded windows configuration with ${windowsConfig.windows.length} window(s)`);
+        const configContent = fs.readFileSync(ecosystemConfigPath, 'utf-8');
+        ecosystemConfig = JSON.parse(configContent);
+        console.log(`[Main] Loaded ecosystem configuration`);
     } catch (error) {
         console.warn(`[Main] Failed to load windows-config.json: ${error.message}. Using default.`);
     }
 
+    const windowsToCreate = ecosystemConfig.windows.filter(w => w.enabled);
+
     // Create windows from config
     const createdWindows = [];
-    windowsConfig.windows.forEach((config, index) => {
-        if (config.enabled) {
-            const windowId = createWindow(config);
-            createdWindows.push({ id: windowId, config: config });
-            windowConfigs.set(config.id, { windowId: windowId, config: config });
-            console.log(`[Main] Created window "${config.name}" (ID: ${windowId}) from ${config.html}`);
+    windowsToCreate.forEach((windowConfig, index) => {
+        const windowId = createWindow(windowConfig);
+        createdWindows.push({ id: windowId, config: windowConfig });
+        windowConfigs.set(windowConfig.id, { windowId: windowId, config: windowConfig });
+        console.log(`[Main] Created window "${windowConfig.name}" (ID: ${windowId}) from ${windowConfig.html}`);
 
-            // Apply position offset if configured
-            const window = windows[windowId];
-            if (window && config.position && (config.position.xOffset !== 0 || config.position.yOffset !== 0)) {
-                window.webContents.once('did-finish-load', () => {
-                    const bounds = window.getBounds();
-                    window.setBounds({
-                        x: bounds.x + config.position.xOffset,
-                        y: bounds.y + config.position.yOffset,
-                        width: bounds.width,
-                        height: bounds.height
-                    });
+        // Apply position offset if configured
+        const window = windows[windowId];
 
-                    console.log(`[Main] Positioned window "${config.name}" at offset (${config.position.xOffset}, ${config.position.yOffset})`);
-                });
-            }
-
-            // Pass wheel options to wheel window via IPC
-            if (config.id === 'wheel' && config?.options?.wheel) {
-                window.webContents.once('did-finish-load', () => {
-                    window.webContents.send('load-wheel-options', config?.options?.wheel);
-                    console.log(`[Main] Sent ${config?.options?.wheel.length} wheel options to wheel window`);
-                });
-            }
-        } else {
-            console.log(`[Main] Window "${config.name}" is disabled, skipping creation`);
+        // Pass wheel options to wheel window via IPC
+        if (windowConfig.id === 'wheel' && windowConfig?.options?.wheel) {
+            window.webContents.once('did-finish-load', () => {
+                window.webContents.send('load-wheel-options', windowConfig?.options?.wheel);
+                console.log(`[Main] Sent ${windowConfig?.options?.wheel.length} wheel options to wheel window`);
+            });
         }
+
     });
 
     // Extract wheel options from config instead of loading from file
-    const wheelWindowConfig = windowsConfig.windows.find(w => w.id === 'wheel');
+    const wheelWindowConfig = ecosystemConfig.windows.find(w => w.id === 'wheel');
     let allWheelOptions = wheelWindowConfig?.options?.wheel || [];
     uniqueApplications.clear(); // Clear any previous applications
 
@@ -390,7 +372,7 @@ app.on('ready', () => {
     }
 
     // Initialize queue managers based on window configuration
-    initializeQueueManagers(windowsConfig, applicationConfigs);
+    initializeQueueManagers(ecosystemConfig, applicationConfigs);
 
     // Twitch integration is now handled directly in src/twitch.js
     if (!(process.env.TWITCH_BOT_USERNAME && process.env.TWITCH_OAUTH_TOKEN && process.env.TWITCH_CHANNEL)) {

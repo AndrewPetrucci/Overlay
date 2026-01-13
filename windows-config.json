@@ -4,7 +4,7 @@
             "id": "twitch",
             "name": "Twitch Window",
             "html": "src/views/oauthConnections/index.html",
-            "enabled": true,
+            "enabled": false,
             "position": {
                 "offset": 1,
                 "xOffset": -610,
@@ -130,7 +130,7 @@
             "id": "boilerplate",
             "name": "Boilerplate Window",
             "html": "src/views/boilerplate/index.html",
-            "enabled": false,
+            "enabled": true,
             "position": {
                 "offset": 1,
                 "xOffset": -610,
