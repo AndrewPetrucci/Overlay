@@ -286,10 +286,10 @@ app.on('ready', () => {
             }
 
             // Pass wheel options to wheel window via IPC
-            if (windowConfig.id === 'wheel' && windowConfig.wheelOptions) {
+            if (windowConfig.id === 'wheel' && windowConfig?.options?.wheel) {
                 window.webContents.once('did-finish-load', () => {
-                    window.webContents.send('load-wheel-options', windowConfig.wheelOptions);
-                    console.log(`[Main] Sent ${windowConfig.wheelOptions.length} wheel options to wheel window`);
+                    window.webContents.send('load-wheel-options', windowConfig?.options?.wheel);
+                    console.log(`[Main] Sent ${windowConfig?.options?.wheel.length} wheel options to wheel window`);
                 });
             }
         } else {
@@ -299,7 +299,7 @@ app.on('ready', () => {
 
     // Extract wheel options from config instead of loading from file
     const wheelWindowConfig = windowsConfig.windows.find(w => w.id === 'wheel');
-    let allWheelOptions = wheelWindowConfig?.wheelOptions || [];
+    let allWheelOptions = wheelWindowConfig?.options?.wheel || [];
     uniqueApplications.clear(); // Clear any previous applications
 
     // Extract unique applications

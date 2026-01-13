@@ -3,20 +3,22 @@
         {
             "id": "twitch",
             "name": "Twitch Window",
-            "html": "src/views/twitch/index.html",
+            "html": "src/views/oauthConnections/index.html",
             "enabled": true,
             "position": {
                 "offset": 1,
                 "xOffset": -610,
                 "yOffset": 0
             },
-            "buttonOptions": [
-                {
-                    "id": "actionBtn",
-                    "controller": "PythonKeys",
-                    "config": {}
-                }
-            ]
+            "options": {
+                "buttons": [
+                    {
+                        "id": "actionBtn",
+                        "controller": "PythonKeys",
+                        "config": {}
+                    }
+                ]
+            }
         },
         {
             "id": "wheel",
@@ -28,99 +30,101 @@
                 "xOffset": 0,
                 "yOffset": 0
             },
-            "wheelOptions": [
-                {
-                    "name": "Insert Timestamp",
-                    "command": "insert_timestamp",
-                    "description": "Insert current date and time",
-                    "enabled": false,
-                    "application": "Notepad",
-                    "controller": "PythonKeys",
-                    "color": "rgba(255, 107, 107, 0.6)",
-                    "config": {
-                        "action": "send_keys",
-                        "value": "^+t"
+            "options": {
+                "wheel": [
+                    {
+                        "name": "Insert Timestamp",
+                        "command": "insert_timestamp",
+                        "description": "Insert current date and time",
+                        "enabled": false,
+                        "application": "Notepad",
+                        "controller": "PythonKeys",
+                        "color": "rgba(255, 107, 107, 0.6)",
+                        "config": {
+                            "action": "send_keys",
+                            "value": "^+t"
+                        }
+                    },
+                    {
+                        "name": "Save File",
+                        "command": "save_file",
+                        "description": "Save the current document",
+                        "enabled": false,
+                        "application": "Notepad",
+                        "controller": "PythonKeys",
+                        "color": "rgba(78, 205, 196, 0.6)",
+                        "config": {
+                            "action": "send_keys",
+                            "value": "^s"
+                        }
+                    },
+                    {
+                        "name": "New File",
+                        "command": "new_file",
+                        "description": "Create a new document",
+                        "enabled": false,
+                        "application": "Notepad",
+                        "color": "rgba(69, 183, 209, 0.6)",
+                        "controller": "AutoHotkey",
+                        "config": {
+                            "action": "send_keys",
+                            "value": "^n"
+                        }
+                    },
+                    {
+                        "name": "Hello World",
+                        "command": "hello_world",
+                        "description": "Insert Hello World text",
+                        "enabled": true,
+                        "application": "Notepad",
+                        "color": "rgba(255, 160, 122, 0.6)",
+                        "controller": "PythonKeys",
+                        "config": {
+                            "action": "insert_text",
+                            "value": "hello world\n"
+                        }
+                    },
+                    {
+                        "name": "New Line",
+                        "command": "new_line",
+                        "description": "Insert a new line",
+                        "enabled": false,
+                        "application": "Notepad",
+                        "color": "rgba(186, 85, 211, 0.6)",
+                        "controller": "PythonKeys",
+                        "config": {
+                            "action": "insert_text",
+                            "value": "\n"
+                        }
+                    },
+                    {
+                        "name": "Frogs",
+                        "command": "frogs",
+                        "description": "ascii Frogs",
+                        "enabled": true,
+                        "application": "Notepad",
+                        "color": "rgba(76, 175, 80, 0.6)",
+                        "controller": "PythonKeys",
+                        "config": {
+                            "action": "insert_text",
+                            "value": "              _         _\n  __   ___.--'_`.     .'_`--.___   __\n ( _`.'. -   'o` )   ( 'o`   - .`.'_ )\n _\\.'_'      _.-'     `-._      `_`./_\n( \\`. )    //\\`         '/\\\\    ( .'/ )\n \\_`-'`---'\\\\__,       ,__//`---'`-'_/\n  \\`        `-\\         /-'        '/\n   `                               '   VK\n"
+                        }
+                    },
+                    {
+                        "name": "Fish",
+                        "command": "fish",
+                        "description": "ascii Fish",
+                        "enabled": true,
+                        "application": "Notepad",
+                        "color": "rgba(33, 150, 243, 0.6)",
+                        "controller": "PythonKeys",
+                        "config": {
+                            "action": "insert_text",
+                            "value": "     |\\    o\n    |  \\    o\n|\\ /    .\\ o\n| |       (\n|/ \\     /\n    |  /\n     |/\n"
+                        }
                     }
-                },
-                {
-                    "name": "Save File",
-                    "command": "save_file",
-                    "description": "Save the current document",
-                    "enabled": false,
-                    "application": "Notepad",
-                    "controller": "PythonKeys",
-                    "color": "rgba(78, 205, 196, 0.6)",
-                    "config": {
-                        "action": "send_keys",
-                        "value": "^s"
-                    }
-                },
-                {
-                    "name": "New File",
-                    "command": "new_file",
-                    "description": "Create a new document",
-                    "enabled": false,
-                    "application": "Notepad",
-                    "color": "rgba(69, 183, 209, 0.6)",
-                    "controller": "AutoHotkey",
-                    "config": {
-                        "action": "send_keys",
-                        "value": "^n"
-                    }
-                },
-                {
-                    "name": "Hello World",
-                    "command": "hello_world",
-                    "description": "Insert Hello World text",
-                    "enabled": true,
-                    "application": "Notepad",
-                    "color": "rgba(255, 160, 122, 0.6)",
-                    "controller": "PythonKeys",
-                    "config": {
-                        "action": "insert_text",
-                        "value": "hello world\n"
-                    }
-                },
-                {
-                    "name": "New Line",
-                    "command": "new_line",
-                    "description": "Insert a new line",
-                    "enabled": false,
-                    "application": "Notepad",
-                    "color": "rgba(186, 85, 211, 0.6)",
-                    "controller": "PythonKeys",
-                    "config": {
-                        "action": "insert_text",
-                        "value": "\n"
-                    }
-                },
-                {
-                    "name": "Frogs",
-                    "command": "frogs",
-                    "description": "ascii Frogs",
-                    "enabled": true,
-                    "application": "Notepad",
-                    "color": "rgba(76, 175, 80, 0.6)",
-                    "controller": "PythonKeys",
-                    "config": {
-                        "action": "insert_text",
-                        "value": "              _         _\n  __   ___.--'_`.     .'_`--.___   __\n ( _`.'. -   'o` )   ( 'o`   - .`.'_ )\n _\\.'_'      _.-'     `-._      `_`./_\n( \\`. )    //\\`         '/\\\\    ( .'/ )\n \\_`-'`---'\\\\__,       ,__//`---'`-'_/\n  \\`        `-\\         /-'        '/\n   `                               '   VK\n"
-                    }
-                },
-                {
-                    "name": "Fish",
-                    "command": "fish",
-                    "description": "ascii Fish",
-                    "enabled": true,
-                    "application": "Notepad",
-                    "color": "rgba(33, 150, 243, 0.6)",
-                    "controller": "PythonKeys",
-                    "config": {
-                        "action": "insert_text",
-                        "value": "     |\\    o\n    |  \\    o\n|\\ /    .\\ o\n| |       (\n|/ \\     /\n    |  /\n     |/\n"
-                    }
-                }
-            ]
+                ]
+            }
         },
         {
             "id": "boilerplate",
@@ -132,13 +136,15 @@
                 "xOffset": -610,
                 "yOffset": 0
             },
-            "buttonOptions": [
-                {
-                    "id": "actionBtn",
-                    "controller": "AutoHotkey",
-                    "config": {}
-                }
-            ]
+            "options": {
+                "buttons": [
+                    {
+                        "id": "actionBtn",
+                        "controller": "AutoHotkey",
+                        "config": {}
+                    }
+                ]
+            }
         },
         {
             "id": "sticky",
@@ -150,15 +156,17 @@
                 "xOffset": 0,
                 "yOffset": 0
             },
-            "buttonOptions": [
-                {
-                    "id": "actionBtn",
-                    "controller": "file-writer",
-                    "config": {
-                        "fileWriterPath": "tmp/sticky-output.json"
+            "options": {
+                "buttons": [
+                    {
+                        "id": "actionBtn",
+                        "controller": "file-writer",
+                        "config": {
+                            "fileWriterPath": "tmp/sticky-output.json"
+                        }
                     }
-                }
-            ]
+                ]
+            }
         },
         {
             "id": "fileWatcher",
@@ -170,7 +178,8 @@
                 "xOffset": 0,
                 "yOffset": 0
             },
-            "dataFile": "tmp/sticky-output.json"
+            "dataFile": "tmp/sticky-output.json",
+            "options": {}
         }
     ],
     "defaults": {
