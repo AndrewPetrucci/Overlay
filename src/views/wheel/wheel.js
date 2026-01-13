@@ -183,9 +183,20 @@ class SpinWheel {
             this.ctx.closePath();
             this.ctx.fillStyle = this.getSliceColor(i);
             this.ctx.fill();
+
+            // Draw only the line between slices (not the outer edge)
+            this.ctx.save();
             this.ctx.strokeStyle = 'white';
             this.ctx.lineWidth = 3;
+            // Draw the line from center to arc edge at start angle
+            this.ctx.beginPath();
+            this.ctx.moveTo(0, 0);
+            this.ctx.lineTo(
+                this.radius * Math.cos((i * sliceAngle) * Math.PI / 180),
+                this.radius * Math.sin((i * sliceAngle) * Math.PI / 180)
+            );
             this.ctx.stroke();
+            this.ctx.restore();
 
             // Draw text
             this.ctx.save();
@@ -194,7 +205,7 @@ class SpinWheel {
             this.ctx.rotate(Math.PI); // Flip text 180 degrees
             this.ctx.textAlign = 'left';
             this.ctx.fillStyle = 'white';
-            this.ctx.font = 'bold 14px Arial';
+            this.ctx.font = 'bold 40px Arial';
             this.ctx.fillText(this.options[i], -this.radius + 20, 10);
             this.ctx.restore();
         }
@@ -202,16 +213,16 @@ class SpinWheel {
         this.ctx.restore();
 
         // Draw center circle
-        this.ctx.beginPath();
-        this.ctx.arc(this.centerX, this.centerY, 30, 0, Math.PI * 2);
-        this.ctx.fillStyle = 'white';
-        this.ctx.fill();
-        this.ctx.strokeStyle = '#667eea';
-        this.ctx.lineWidth = 3;
-        this.ctx.stroke();
+        // this.ctx.beginPath();
+        // this.ctx.arc(this.centerX, this.centerY, 30, 0, Math.PI * 2);
+        // this.ctx.fillStyle = 'white';
+        // this.ctx.fill();
+        // this.ctx.strokeStyle = '#667eea';
+        // this.ctx.lineWidth = 3;
+        // this.ctx.stroke();
 
         // Draw pointer
-        this.ctx.fillStyle = '#667eea';
+        this.ctx.fillStyle = '#ffffff';
         this.ctx.beginPath();
         this.ctx.moveTo(this.centerX - 15, this.centerY - this.radius + 20);
         this.ctx.lineTo(this.centerX + 15, this.centerY - this.radius + 20);

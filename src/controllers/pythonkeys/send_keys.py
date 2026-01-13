@@ -7,6 +7,7 @@ import pywinauto
 from pywinauto.keyboard import send_keys
 from pywinauto.findwindows import ElementNotFoundError
 import pyperclip
+import win32gui # type: ignore
 
 # Setup logging
 logging.basicConfig(filename='pythonkeys-executor-debug.log', level=logging.INFO, format='%(asctime)s %(message)s')
@@ -39,27 +40,8 @@ try:
     app = pywinauto.Application(backend='win32').connect(class_name=args.target)
     window = app.window(class_name=args.target)
     logging.info(f'Window found: {window}')
-    # Capture mouse position before focusing window
-    try:
-        import ctypes
-        class POINT(ctypes.Structure):
-            _fields_ = [ ("x", ctypes.c_long), ("y", ctypes.c_long) ]
-        pt = POINT()
-        ctypes.windll.user32.GetCursorPos(ctypes.byref(pt))
-        mouse_pos = (pt.x, pt.y)
-        logging.info(f'Captured mouse position: {mouse_pos}')
-    except Exception as e:
-        logging.warning(f'Failed to capture mouse position: {e}')
-        mouse_pos = None
-    window.set_focus()
-    logging.info('Window focused.')
-    # Restore mouse position
-    if mouse_pos:
-        try:
-            ctypes.windll.user32.SetCursorPos(mouse_pos[0], mouse_pos[1])
-            logging.info(f'Restored mouse position to: {mouse_pos}')
-        except Exception as e:
-            logging.warning(f'Failed to restore mouse position: {e}')
+    win32gui.SetForegroundWindow(window.handle)
+    logging.info('Window brought to foreground.')
     time.sleep(0.2)
     active_title = window.wrapper_object().window_text()
     logging.info(f'Active window title: {active_title}')
@@ -67,11 +49,6 @@ try:
     # Use clipboard paste for text with newlines or leading/trailing spaces
     text = process_escape_sequences(args.keys)
     if '\n' in args.keys or '\r' in args.keys or text.strip() != text or ' ' in text or '\t' in args.keys:
-        try:
-            import pyperclip
-        except ImportError:
-            logging.error('pyperclip is required for clipboard paste. Install with: pip install pyperclip')
-            sys.exit(1)
         pyperclip.copy(text)
         send_keys('^v')
         logging.info('Text sent via clipboard paste.')
