@@ -7,7 +7,7 @@ import pywinauto
 from pywinauto.keyboard import send_keys
 from pywinauto.findwindows import ElementNotFoundError
 import pyperclip
-import win32gui # type: ignore
+import win32gui
 
 # Setup logging
 logging.basicConfig(filename='pythonkeys-executor-debug.log', level=logging.INFO, format='%(asctime)s %(message)s')
