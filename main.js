@@ -54,7 +54,8 @@ oauthApp.post('/token', express.json(), (req, res) => {
 oauthApp.listen(OAUTH_PORT, () => {
     console.log(`[OAuth] Listening for Twitch OAuth redirect on http://localhost:${OAUTH_PORT}/`);
 });
-require('dotenv').config();
+// Load .env from the directory of the running executable (for packaged .exe)
+require('./load-env-exe-dir')();
 const { app, BrowserWindow, ipcMain, globalShortcut } = require('electron');
 
 const path = require('path');

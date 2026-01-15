@@ -58,3 +58,12 @@ I've spent that last 2 days pushing the project to be more framework like. I thi
 To prove that the project has legs I am going to start running at two different implementations.
 1. skyrim wheel example - this is just a lot of manual testing against skyrim and working on the wheel ui
 2. I need to add a bunch of utility around target applications changing state. (minimize, maximize, close, resize,move) Maybe have one applicationMetadataUpdate method.
+
+
+### 1/15/2026
+After much banging my head against the model I've finally got the release process down. I guess there was the start of a refactor as well. I want to move more of the ipc handler and listener creation into the view folders? Ill think on this more. Development planning remains unchanged.
+
+#### Development Planning
+To prove that the project has legs I am going to start running at two different implementations.
+1. skyrim wheel example - this is just a lot of manual testing against skyrim and working on the wheel ui
+2. I need to add a bunch of utility around target applications changing state. (minimize, maximize, close, resize,move) Maybe have one applicationMetadataUpdate method.
