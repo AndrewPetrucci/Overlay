@@ -48,7 +48,15 @@ class SharedQueueManager {
         if (workerPath.includes('.asar')) {
             workerPath = workerPath.replace(/app\.asar(\\|\/|$)/, 'app.asar.unpacked$1');
         }
-        const worker = spawn('node', [workerPath, queueName], {
+        // Use node executable instead of Electron
+        let nodeExec = 'node';
+        if (process.env.NODE_ENV === 'production') {
+            // If you bundle node.exe, set its path here, e.g.:
+            // nodeExec = path.join(process.resourcesPath, 'node.exe');
+        }
+        console.log(`[SharedQueueManager] Spawning worker with execPath: ${nodeExec}`);
+        console.log(`[SharedQueueManager] Worker script path: ${workerPath}`);
+        const worker = spawn(nodeExec, [workerPath, queueName], {
             stdio: ['ignore', 'inherit', 'inherit', 'ipc']
         });
 

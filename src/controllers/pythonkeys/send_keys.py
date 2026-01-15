@@ -1,11 +1,20 @@
+
 import sys
+print("[PYTHON DIAGNOSTIC] Executable:", sys.executable)
+print("[PYTHON DIAGNOSTIC] sys.path:", sys.path)
+
 import json
 import argparse
 import time
 import logging
-import pywinauto
-from pywinauto.keyboard import send_keys
-from pywinauto.findwindows import ElementNotFoundError
+try:
+    import pywinauto
+    from pywinauto.keyboard import send_keys
+    from pywinauto.findwindows import ElementNotFoundError
+    print("[PYTHON DIAGNOSTIC] pywinauto import: SUCCESS")
+except ImportError as e:
+    print("[PYTHON DIAGNOSTIC] pywinauto import: FAILED", e)
+    raise
 import pyperclip
 
 try:

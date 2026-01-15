@@ -125,3 +125,4 @@ This project is licensed under the **GNU General Public License v3.0** (GPL-3.0)
 - You may copy, modify, and distribute this software under the terms of the GPL v3 or (at your option) any later version.
 - This software is provided WITHOUT WARRANTY; see the license for details.
 - For the full license text, see: https://www.gnu.org/licenses/gpl-3.0.txt
+Compress-Archive -Path .\dist\win-unpacked\* -DestinationPath .\dist\skyrim-twitch-wheel-win.zip

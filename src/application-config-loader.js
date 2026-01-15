@@ -3,6 +3,12 @@
  * Dynamically loads application-specific settings and executors
  */
 
+
+// Patch: resolve asar to asar.unpacked for runtime file access
+function resolveUnpackedPath(filePath) {
+    return typeof filePath === 'string' ? filePath.replace('app.asar', 'app.asar.unpacked') : filePath;
+}
+
 const fs = require('fs');
 const path = require('path');
 
@@ -12,6 +18,11 @@ class ApplicationConfigLoader {
         this.applicationDir = path.join(__dirname, '..', 'applications', applicationName);
         this.configDir = path.join(this.applicationDir, 'config');
         this.executorDir = path.join(this.applicationDir, 'executors');
+
+        // Patch: resolve to app.asar.unpacked if running from asar
+        this.applicationDir = resolveUnpackedPath(this.applicationDir);
+        this.configDir = resolveUnpackedPath(this.configDir);
+        this.executorDir = resolveUnpackedPath(this.executorDir);
 
         this.wheelOptions = [];
         this.controllers = {};
@@ -49,7 +60,6 @@ class ApplicationConfigLoader {
             return [];
         }
     }
-
     getExecutorScript(scriptName = 'console-executor.py') {
         const scriptPath = path.join(this.executorDir, scriptName);
         if (fs.existsSync(scriptPath)) {

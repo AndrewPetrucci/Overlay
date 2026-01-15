@@ -4,6 +4,8 @@
  * Spawned by QueueManager as a child process
  */
 
+console.log('[QueueWorker] queue-worker.js loaded and running');
+
 const path = require('path');
 
 class QueueWorker {
@@ -31,6 +33,8 @@ class QueueWorker {
 
         try {
             const controllerPath = path.join(__dirname, `../../controllers/${controller.toLowerCase()}/executor-controller`);
+            // Log resolved controller path for debugging
+            console.log(`[QueueWorker:${this.queueName}] Attempting to require controller at: ${controllerPath}`);
             const module = require(controllerPath);
             this.controllerModuleCache[controller] = module;
             console.log(`[QueueWorker:${this.queueName}] Loaded controller module: ${controller}`);
@@ -99,6 +103,7 @@ class QueueWorker {
                         // Dynamically load and execute the controller
                         const controllerModule = this.getControllerModule(controller);
                         if (controllerModule.executeController) {
+                            console.log(`[QueueWorker:${this.queueName}] Calling executeController for controller: ${controller}`);
                             await controllerModule.executeController(eventData, this.applicationConfigs);
                         } else {
                             console.error(`[QueueWorker:${this.queueName}] Controller module does not export executeController`);

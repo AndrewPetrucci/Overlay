@@ -39,7 +39,8 @@
         ],
         "asarUnpack": [
             "src/views/shared/queue-worker.js",
-            "src/controllers/pythonkeys/**"
+            "src/controllers/**",
+            "src/applications/**"
         ]
     }
 }
