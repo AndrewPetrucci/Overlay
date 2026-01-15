@@ -4,7 +4,7 @@
             "id": "twitch",
             "name": "Twitch Window",
             "html": "src/views/oauthConnections/index.html",
-            "enabled": false,
+            "enabled": true,
             "position": {
                 "offset": 1,
                 "xOffset": -610,
@@ -22,7 +22,7 @@
         },
         {
             "id": "wheel",
-            "name": "Twitch Wheel",
+            "name": "Twitch Wheel!!!",
             "html": "src/views/wheel/index.html",
             "enabled": true,
             "position": {

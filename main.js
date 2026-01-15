@@ -54,13 +54,16 @@ oauthApp.post('/token', express.json(), (req, res) => {
 oauthApp.listen(OAUTH_PORT, () => {
     console.log(`[OAuth] Listening for Twitch OAuth redirect on http://localhost:${OAUTH_PORT}/`);
 });
-// Load .env from the directory of the running executable (for packaged .exe)
-require('./load-env-exe-dir')();
-const { app, BrowserWindow, ipcMain, globalShortcut } = require('electron');
+// Load .env and windows-config.json from the directory of the running executable (for packaged .exe)
+const { loadFromExeDir } = require('./src/load-from-exe-dir');
+// Load .env file and set process.env variables
+loadFromExeDir('.env');
+console.log('[DEBUG] TWITCH_CLIENT_ID:', process.env.TWITCH_CLIENT_ID);
+console.log('[DEBUG] TWITCH_CLIENT_SECRET:', process.env.TWITCH_CLIENT_SECRET);
+const { app, BrowserWindow, ipcMain } = require('electron');
 
 const path = require('path');
 const fs = require('fs');
-const { spawn } = require('child_process');
 
 const ApplicationConfigLoader = require('./src/application-config-loader');
 
@@ -242,16 +245,19 @@ function registerIpcHandlers() {
 app.on('ready', () => {
     registerIpcHandlers();
 
-    // Load ecosystem configuration
-    const ecosystemConfigPath = path.join(__dirname, 'windows-config.json');
-    let ecosystemConfig = { windows: [] };
 
-    try {
-        const configContent = fs.readFileSync(ecosystemConfigPath, 'utf-8');
-        ecosystemConfig = JSON.parse(configContent);
-        console.log(`[Main] Loaded ecosystem configuration`);
-    } catch (error) {
-        console.warn(`[Main] Failed to load windows-config.json: ${error.message}. Using default.`);
+    // Load ecosystem configuration from exe dir if present, else fall back to __dirname
+    let ecosystemConfig = loadFromExeDir('windows-config.json');
+    if (!ecosystemConfig) {
+        const ecosystemConfigPath = path.join(__dirname, 'windows-config.json');
+        try {
+            const configContent = fs.readFileSync(ecosystemConfigPath, 'utf-8');
+            ecosystemConfig = JSON.parse(configContent);
+            console.log(`[Main] Loaded ecosystem configuration from app directory`);
+        } catch (error) {
+            console.warn(`[Main] Failed to load windows-config.json from app directory: ${error.message}. Using default.`);
+            ecosystemConfig = { windows: [] };
+        }
     }
 
     const windowsToCreate = ecosystemConfig.windows.filter(w => w.enabled);
