@@ -1,3 +1,18 @@
+// Simple file-based logger
+const fs = require('fs');
+const pathMod = require('path');
+function fileLog(message) {
+    const logDir = pathMod.join(process.cwd(), 'logs');
+    const logFile = pathMod.join(logDir, 'app.log');
+    const timestamp = new Date().toISOString();
+    try {
+        if (!fs.existsSync(logDir)) fs.mkdirSync(logDir, { recursive: true });
+        fs.appendFileSync(logFile, `[${timestamp}] ${message}\n`);
+    } catch (err) {
+        // Fallback to console if file logging fails
+        console.error('Failed to write log file:', err);
+    }
+}
 const { spawn } = require('child_process');
 const path = require('path');
 const { BrowserWindow } = require('electron');
@@ -50,12 +65,21 @@ class SharedQueueManager {
         }
         // Use node executable instead of Electron
         let nodeExec = 'node';
-        if (process.env.NODE_ENV === 'production') {
-            // If you bundle node.exe, set its path here, e.g.:
-            // nodeExec = path.join(process.resourcesPath, 'node.exe');
+        const { app } = require('electron');
+        if (app.isPackaged) {
+            // Use bundled node.exe next to the executable
+            const exeDir = pathMod.dirname(process.argv[0]);
+            const bundledNode = pathMod.join(exeDir, 'node.exe');
+            fileLog(`[SharedQueueManager] Checking for bundled node.exe at: ${bundledNode}`);
+            if (fs.existsSync(bundledNode)) {
+                nodeExec = bundledNode;
+                fileLog(`[SharedQueueManager] Using bundled node.exe: ${nodeExec}`);
+            } else {
+                fileLog(`[SharedQueueManager] Bundled node.exe not found at: ${bundledNode}. Falling back to system node.`);
+            }
         }
-        console.log(`[SharedQueueManager] Spawning worker with execPath: ${nodeExec}`);
-        console.log(`[SharedQueueManager] Worker script path: ${workerPath}`);
+        fileLog(`[SharedQueueManager] Spawning worker with execPath: ${nodeExec}`);
+        fileLog(`[SharedQueueManager] Worker script path: ${workerPath}`);
         const worker = spawn(nodeExec, [workerPath, queueName], {
             stdio: ['ignore', 'inherit', 'inherit', 'ipc']
         });
