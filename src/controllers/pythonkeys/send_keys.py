@@ -60,11 +60,33 @@ try:
     app = pywinauto.Application(backend='win32').connect(class_name=args.target)
     window = app.window(class_name=args.target)
     logging.info(f'Window found: {window}')
-    if( has_win32gui ):
-        win32gui.SetForegroundWindow(window.handle)
+    handle = getattr(window, 'handle', None)
+    logging.info(f'Window handle: {handle}')
+    abort = False
+    if has_win32gui:
+        if handle and isinstance(handle, int) and handle != 0:
+            try:
+                win32gui.SetForegroundWindow(handle)
+                logging.info('Window brought to foreground using win32gui.')
+            except Exception as e:
+                logging.error(f'Error calling SetForegroundWindow: {e}')
+                abort = True
+        else:
+            logging.error(f'Invalid window handle: {handle}')
+            abort = True
     else:
-        window.set_focus()
-    logging.info('Window brought to foreground.')
+        try:
+            window.set_focus()
+            logging.info('Window brought to foreground using set_focus.')
+        except Exception as e:
+            logging.error(f'Error calling set_focus: {e}')
+            abort = True
+
+    if abort:
+        logging.error('Aborting: Could not bring window to foreground. Keys will NOT be sent.')
+        print('Error: Could not bring window to foreground. Keys not sent.', file=sys.stderr)
+        sys.exit(1)
+
     time.sleep(0.2)
     active_title = window.wrapper_object().window_text()
     logging.info(f'Active window title: {active_title}')
