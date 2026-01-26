@@ -31,7 +31,7 @@ app.on('ready', () => {
         show: false // Hidden for testing
     });
 
-    mainWindow.loadFile('src/index.html');
+    mainWindow.loadFile('src/views/wheel/index.html');
 
     // Open DevTools if not in test mode
     if (process.env.DEBUG_TEST) {

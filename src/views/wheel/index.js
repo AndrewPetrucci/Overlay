@@ -18,12 +18,43 @@ class SpinWheel {
             '#98D8C8', '#F7DC6F', '#BB8FCE', '#85C1E2'
         ];
 
+        // Load background image
+        this.backgroundImage = new window.Image();
+        //todo make dynamic path
+        this.backgroundImage.src = 'shield.png';
+        this.backgroundImageLoaded = false;
+        this.backgroundImage.onload = () => {
+            this.backgroundImageLoaded = true;
+            this.draw();
+        };
+
         // Auto-spin configuration (in milliseconds: 30000 = 30 seconds)
         this.autoSpinInterval = 30000;
         this.autoSpinTimer = null;
 
         this.setupEventListeners();
         this.draw();
+
+        // Listen for Twitch connection status and update chatStatus
+        if (window.electron && window.electron.onTwitchStatusChanged) {
+            window.electron.onTwitchStatusChanged((status) => {
+                const chatStatus = document.getElementById('chatStatus');
+                if (chatStatus) {
+                    let icon = '';
+                    let message = '';
+                    if (status.isConnected) {
+                        icon = '✅';
+                        message = 'Connected to Twitch';
+                        chatStatus.className = 'connected';
+                    } else {
+                        icon = '❌';
+                        message = 'Twitch connection failed';
+                        chatStatus.className = 'error';
+                    }
+                    chatStatus.textContent = `Twitch: ${icon} ${message}`;
+                }
+            });
+        }
     }
 
     setupEventListeners() {
@@ -53,6 +84,33 @@ class SpinWheel {
             window.electron.onSpinResult((result) => {
                 this.updateResult(result);
             });
+            // Listen for Twitch chat !spin trigger from main process
+            if (window.electron && window.electron.onTwitchSpinTriggered === undefined) {
+                // Add a handler if not already present in preload.js
+                window.electron.onTwitchSpinTriggered = (callback) => {
+                    if (window.electron && window.electron.sendMessage) {
+                        window.electron.onTwitchSpinTriggeredCallback = callback;
+                        window.electron.sendMessage('register-twitch-spin-triggered', {});
+                    }
+                };
+            }
+            if (window.electron.onTwitchSpinTriggered) {
+                window.electron.onTwitchSpinTriggered(() => {
+                    this.spin();
+                });
+            }
+            // Fallback: listen for the IPC event directly if exposed
+            if (window.electron && window.electron.onTwitchSpin) {
+                window.electron.onTwitchSpin(() => {
+                    this.spin();
+                });
+            }
+            // Or listen for the event on the window
+            if (window && window.addEventListener) {
+                window.addEventListener('twitch-spin-triggered', () => {
+                    this.spin();
+                });
+            }
         }
 
         // Get auto-spin configuration from main process
@@ -97,10 +155,21 @@ class SpinWheel {
         // Clear canvas
         this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
 
-        // Draw wheel
+        // Draw wheel and background image in rotated context
         this.ctx.save();
         this.ctx.translate(this.centerX, this.centerY);
         this.ctx.rotate((this.rotation * Math.PI) / 180);
+
+        // Draw background image if loaded (centered)
+        if (this.backgroundImageLoaded) {
+            this.ctx.drawImage(
+                this.backgroundImage,
+                -this.centerX,
+                -this.centerY,
+                this.canvas.width,
+                this.canvas.height
+            );
+        }
 
         const sliceAngle = 360 / this.options.length;
 
@@ -114,16 +183,29 @@ class SpinWheel {
             this.ctx.closePath();
             this.ctx.fillStyle = this.getSliceColor(i);
             this.ctx.fill();
+
+            // Draw only the line between slices (not the outer edge)
+            this.ctx.save();
             this.ctx.strokeStyle = 'white';
             this.ctx.lineWidth = 3;
+            // Draw the line from center to arc edge at start angle
+            this.ctx.beginPath();
+            this.ctx.moveTo(0, 0);
+            this.ctx.lineTo(
+                this.radius * Math.cos((i * sliceAngle) * Math.PI / 180),
+                this.radius * Math.sin((i * sliceAngle) * Math.PI / 180)
+            );
             this.ctx.stroke();
+            this.ctx.restore();
 
             // Draw text
             this.ctx.save();
             this.ctx.rotate(((i * sliceAngle + sliceAngle / 2) * Math.PI) / 180);
+            // todo: make this dynamic based off a helper function or static option
+            this.ctx.rotate(Math.PI); // Flip text 180 degrees
             this.ctx.textAlign = 'left';
             this.ctx.fillStyle = 'white';
-            this.ctx.font = 'bold 14px Arial';
+            this.ctx.font = 'bold 40px Arial';
             this.ctx.fillText(this.options[i], -this.radius + 20, 10);
             this.ctx.restore();
         }
@@ -131,16 +213,16 @@ class SpinWheel {
         this.ctx.restore();
 
         // Draw center circle
-        this.ctx.beginPath();
-        this.ctx.arc(this.centerX, this.centerY, 30, 0, Math.PI * 2);
-        this.ctx.fillStyle = 'white';
-        this.ctx.fill();
-        this.ctx.strokeStyle = '#667eea';
-        this.ctx.lineWidth = 3;
-        this.ctx.stroke();
+        // this.ctx.beginPath();
+        // this.ctx.arc(this.centerX, this.centerY, 30, 0, Math.PI * 2);
+        // this.ctx.fillStyle = 'white';
+        // this.ctx.fill();
+        // this.ctx.strokeStyle = '#667eea';
+        // this.ctx.lineWidth = 3;
+        // this.ctx.stroke();
 
         // Draw pointer
-        this.ctx.fillStyle = '#667eea';
+        this.ctx.fillStyle = '#ffffff';
         this.ctx.beginPath();
         this.ctx.moveTo(this.centerX - 15, this.centerY - this.radius + 20);
         this.ctx.lineTo(this.centerX + 15, this.centerY - this.radius + 20);
@@ -201,11 +283,6 @@ class SpinWheel {
         // Update UI
         this.updateResult(winner);
 
-        // Trigger mod integration
-        if (typeof modClient !== 'undefined') {
-            modClient.onWheelSpin(winner);
-        }
-
         // Send full option object to main process (includes config)
         if (window.electron) {
             window.electron.spinWheel(winnerObject || { name: winner });
@@ -224,6 +301,46 @@ class SpinWheel {
 
 // Initialize wheel when DOM is ready
 document.addEventListener('DOMContentLoaded', async () => {
+    let wheelInitialized = false;
+
+    // Listen for wheel options from main process
+    if (window.electron) {
+        window.electron.onLoadWheelOptions((wheelOptions) => {
+            if (!wheelInitialized) {
+                console.log('[Wheel] Received wheel options from main process:', wheelOptions);
+
+                // Filter enabled options and create two arrays: names and full objects
+                const enabledOptions = wheelOptions.filter(opt => {
+                    const isEnabled = opt.enabled !== false;
+                    console.log(`Option "${opt.name}" - enabled: ${opt.enabled}, will render: ${isEnabled}`);
+                    return isEnabled;
+                });
+
+                const options = enabledOptions.map(opt => opt.name);
+                const optionObjects = enabledOptions;
+
+                console.log('Final wheel options (enabled only):', options);
+                console.log('Final wheel option objects:', optionObjects);
+
+                // Create wheel with both names and full objects
+                window.wheel = new SpinWheel('wheelCanvas', options, optionObjects);
+                wheelInitialized = true;
+                console.log('[Wheel] ✓ SpinWheel instance created successfully from windows-config.json');
+            }
+        });
+    }
+
+    // Wait a moment for IPC message, then use fallback if not received
+    await new Promise(resolve => setTimeout(resolve, 100));
+
+    if (wheelInitialized) {
+        console.log('[Wheel] Wheel already initialized from config');
+        return;
+    }
+
+    console.log('[Wheel] No config received, attempting to load from fallback file...');
+
+    // Fallback: Try to load options from file if not provided via IPC
     let options = [
         'Dragons',
         'Spiders',
@@ -240,12 +357,12 @@ document.addEventListener('DOMContentLoaded', async () => {
         'Speed boost'
     ];
 
-    // Try to load options from wheel-options.json
+    // Try to load options from wheel-options.json as fallback
     try {
         // Try in order: test config (if running tests), then root-level
         const pathsToTry = [
-            `../tmp/wheel-options-test.json`,  // Test config (highest priority)
-            `../wheel-options.json`            // Root-level config
+            `../../tmp/wheel-options-test.json`,  // Test config (highest priority)
+            `../../wheel-options.json`            // Root-level config
         ];
 
         let response = null;
@@ -254,7 +371,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         for (const optionsPath of pathsToTry) {
             try {
-                console.log(`[Wheel] Attempting to load from: ${optionsPath}`);
+                console.log(`[Wheel] Attempting to load fallback options from: ${optionsPath}`);
                 response = await fetch(optionsPath);
                 console.log(`[Wheel] Fetch response status for ${optionsPath}: ${response.status}`);
 
@@ -274,7 +391,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         if (response && response.ok) {
             const data = await response.json();
-            console.log('Raw options from JSON:', data.options);
+            console.log('Raw fallback options from JSON:', data.options);
 
             // Filter enabled options and create two arrays: names and full objects
             const enabledOptions = data.options.filter(opt => {

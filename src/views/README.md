@@ -20,7 +20,6 @@ The main spinning wheel window with Twitch integration and mod support.
 - `styles.css` - Wheel styling
 - `wheel.js` - SpinWheel class and spin logic
 - `window-bar.js` - Window dragging and control buttons
-- `twitch-client.js` - Twitch chat integration
 
 **Features:**
 - Spinning wheel with configurable options
