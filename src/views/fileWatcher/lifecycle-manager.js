@@ -7,7 +7,8 @@
 const path = require('path');
 const fs = require('fs');
 const { ipcMain } = require('electron');
-const SharedQueueManager = require('../shared/queue-manager');
+const SharedQueueManager = require('../shared/lifecycle-manager');
+const { on } = require('../../preload-helpers');
 
 class FileWatcherQueueManager extends SharedQueueManager {
     constructor(windowConfig = {}) {
@@ -59,6 +60,17 @@ class FileWatcherQueueManager extends SharedQueueManager {
         });
 
         console.log('[FileWatcherQueueManager] IPC listeners setup complete');
+    }
+
+    /**
+     * Return preload API definitions for file watcher
+     */
+    getPreloadAPI() {
+        return {
+            onFileUpdated: on('file-updated'),
+            onFileContent: on('file-content'),
+            onFileWriterEvent: on('file-writer-event')
+        };
     }
 
     /**

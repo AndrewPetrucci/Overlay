@@ -5,7 +5,7 @@
  */
 
 const path = require('path');
-const SharedQueueManager = require('../shared/queue-manager');
+const SharedQueueManager = require('../shared/lifecycle-manager');
 
 class BoilerplateQueueManager extends SharedQueueManager {
     constructor(windowConfig = {}) {

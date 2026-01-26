@@ -95,22 +95,39 @@ class QueueWorker {
             while (this.queue.length > 0) {
                 const eventData = this.queue.shift();
                 console.log(`[QueueWorker:${this.queueName}] Processing item (${this.queue.length} remaining)`);
+                console.log(`[QueueWorker:${this.queueName}] Event data:`, JSON.stringify(eventData, null, 2));
 
                 try {
-                    if (eventData.config) {
-                        const controller = eventData.controller || 'file-writer';
+                    // Handle wrapped result structure (from wheel) or direct structure (from buttons)
+                    let actualData = eventData;
+                    if (eventData.result && eventData.result.config) {
+                        // Data is wrapped in a 'result' property - unwrap it
+                        actualData = eventData.result;
+                        // Preserve controller from outer object if present
+                        if (eventData.controller && !actualData.controller) {
+                            actualData.controller = eventData.controller;
+                        }
+                        console.log(`[QueueWorker:${this.queueName}] Unwrapped result structure`);
+                    }
+                    
+                    if (actualData.config) {
+                        const controller = actualData.controller || 'file-writer';
+                        console.log(`[QueueWorker:${this.queueName}] Using controller: ${controller}`);
 
                         // Dynamically load and execute the controller
                         const controllerModule = this.getControllerModule(controller);
                         if (controllerModule.executeController) {
                             console.log(`[QueueWorker:${this.queueName}] Calling executeController for controller: ${controller}`);
-                            await controllerModule.executeController(eventData, this.applicationConfigs);
+                            await controllerModule.executeController(actualData, this.applicationConfigs);
                         } else {
                             console.error(`[QueueWorker:${this.queueName}] Controller module does not export executeController`);
                         }
+                    } else {
+                        console.warn(`[QueueWorker:${this.queueName}] Item missing 'config' property, skipping. Event data keys:`, Object.keys(actualData || {}));
                     }
                 } catch (error) {
                     console.error(`[QueueWorker:${this.queueName}] Error processing item: ${error.message}`);
+                    console.error(`[QueueWorker:${this.queueName}] Error stack:`, error.stack);
                 }
             }
 

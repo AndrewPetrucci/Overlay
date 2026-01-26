@@ -209,6 +209,23 @@ class SharedQueueManager {
         this.workers.clear();
         console.log(`[${this.constructor.name}] All workers stopped`);
     }
+
+    /**
+     * Lifecycle hook: Return preload API definitions for this lifecycle manager
+     * Override this in subclasses to expose IPC handlers to the renderer
+     * 
+     * @returns {Object} Object mapping API method names to their implementations
+     * 
+     * Example:
+     * {
+     *   methodName: (args) => ipcRenderer.invoke('channel', args),
+     *   onEventName: (callback) => ipcRenderer.on('event-channel', (event, data) => callback(data))
+     * }
+     */
+    getPreloadAPI() {
+        // Override in subclasses to provide preload API definitions
+        return {};
+    }
 }
 
 module.exports = SharedQueueManager;

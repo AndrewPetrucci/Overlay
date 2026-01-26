@@ -128,11 +128,11 @@ window.electron.moveWindowTo(x, y);
 
 ## IPC Listeners
 
-IPC listeners (Electron inter-process communication handlers) live in **`queue-manager.js`** for each view.
+IPC listeners (Electron inter-process communication handlers) live in **`lifecycle-manager.js`** for each view.
 
 ### Pattern
 
-Each view's `queue-manager.js` extends `SharedQueueManager` and can set up IPC listeners in its constructor:
+Each view's `lifecycle-manager.js` extends `SharedQueueManager` and can set up IPC listeners in its constructor:
 
 ```javascript
 class YourWindowQueueManager extends SharedQueueManager {
@@ -154,7 +154,7 @@ class YourWindowQueueManager extends SharedQueueManager {
 
 The `fileWatcher` view demonstrates this pattern:
 
-**Location:** `fileWatcher/queue-manager.js`
+**Location:** `fileWatcher/lifecycle-manager.js`
 
 ```javascript
 setupIpcListeners() {
@@ -169,7 +169,7 @@ When the fileWatcher window is initialized (via `windows-config.json`), its queu
 
 ### Adding New IPC Handlers
 
-1. **Edit your view's `queue-manager.js`**
+1. **Edit your view's `lifecycle-manager.js`**
 2. **Add `setupIpcListeners()` method**
 3. **Register handlers with `ipcMain.on()`**
 4. **Queue manager is initialized when window is created** - No additional setup needed

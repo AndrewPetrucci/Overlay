@@ -34,6 +34,12 @@ let latestOAuthToken = null;
 oauthApp.post('/token', express.json(), (req, res) => {
     latestOAuthToken = req.body.token;
     console.log('[OAuth] Received access token:', latestOAuthToken);
+    
+    // Save token securely for future sessions
+    if (tokenStorage.saveToken(latestOAuthToken)) {
+        console.log('[OAuth] Token saved securely for future sessions');
+    }
+    
     // Optionally, send to all renderer windows
     for (const win of Object.values(windows)) {
         if (win && win.webContents) {
@@ -66,10 +72,15 @@ const path = require('path');
 const fs = require('fs');
 
 const ApplicationConfigLoader = require('./src/application-config-loader');
+const TokenStorage = require('./src/token-storage');
+const { generatePreload } = require('./src/preload-generator');
 
 const windows = {}; // Map to store windows by ID
 let applicationConfigs = {};
 let uniqueApplications = new Set(); // Move to global scope
+
+// Initialize token storage
+const tokenStorage = new TokenStorage();
 
 // Queue managers for different window types
 const queueManagers = new Map(); // Map of windowType -> manager instance
@@ -143,7 +154,7 @@ function initializeQueueManagers(ecosystemConfig, appConfigs) {
 
         try {
             // Try to load the queue manager for this window type
-            const queueManagerPath = path.join(__dirname, `src/views/${windowType}/queue-manager`);
+            const queueManagerPath = path.join(__dirname, `src/views/${windowType}/lifecycle-manager`);
 
             // Check if the queue manager file exists
             if (!fs.existsSync(queueManagerPath + '.js')) {
@@ -245,6 +256,22 @@ function registerIpcHandlers() {
 app.on('ready', () => {
     registerIpcHandlers();
 
+    // Load saved OAuth token if available
+    const savedToken = tokenStorage.loadToken();
+    if (savedToken) {
+        console.log('[Main] Loaded saved OAuth token from secure storage');
+        process.env.TWITCH_OAUTH_TOKEN = savedToken;
+        
+        // Try to connect to Twitch with saved token if credentials are available
+        if (process.env.TWITCH_BOT_USERNAME && process.env.TWITCH_CHANNEL) {
+            try {
+                const { connectTwitch } = require('./src/twitch');
+                connectTwitch();
+            } catch (err) {
+                console.error('[Main] Failed to connect Twitch with saved token:', err);
+            }
+        }
+    }
 
     // Load ecosystem configuration from exe dir if present, else fall back to __dirname
     let ecosystemConfig = loadFromExeDir('windows-config.json');
@@ -261,6 +288,15 @@ app.on('ready', () => {
     }
 
     const windowsToCreate = ecosystemConfig.windows.filter(w => w.enabled);
+
+    // Generate preload.js from lifecycle manager APIs before creating windows
+    try {
+        const preloadPath = path.join(__dirname, 'preload.js');
+        generatePreload(windowsToCreate, preloadPath);
+    } catch (error) {
+        console.error('[Main] Failed to generate preload.js:', error);
+        console.warn('[Main] Continuing with existing preload.js');
+    }
 
     // Create windows from config
     const createdWindows = [];
@@ -377,6 +413,15 @@ app.on('ready', () => {
     // Initialize queue managers based on window configuration
     initializeQueueManagers(ecosystemConfig, applicationConfigs);
 
+    // Regenerate preload.js after all lifecycle managers are initialized
+    // This ensures we capture any APIs that require full initialization
+    try {
+        const preloadPath = path.join(__dirname, 'preload.js');
+        generatePreload(queueManagers, preloadPath);
+    } catch (error) {
+        console.error('[Main] Failed to regenerate preload.js after initialization:', error);
+    }
+
     // Twitch integration is now handled directly in src/twitch.js
     if (!(process.env.TWITCH_BOT_USERNAME && process.env.TWITCH_OAUTH_TOKEN && process.env.TWITCH_CHANNEL)) {
         console.log('Twitch credentials not configured - Twitch integration disabled');
@@ -435,8 +480,12 @@ ipcMain.on('spin-wheel', (event, wheelResult) => {
 
         // Create queue name from application and controller
         const application = wheelResult.application || 'Notepad';
-        const controller = wheelResult.controller || 'pythonkeys';
+        // Normalize controller name to lowercase for consistency
+        const controller = (wheelResult.controller || 'pythonkeys').toLowerCase();
         const queueName = `${application}-${controller}`;
+        
+        // Normalize controller name in wheelResult for worker
+        wheelResult.controller = controller;
 
         // Get the wheel queue manager
         const wheelQueueManager = queueManagers.get('wheel');

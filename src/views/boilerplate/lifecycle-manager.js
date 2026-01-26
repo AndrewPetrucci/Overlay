@@ -1,17 +1,17 @@
 /**
- * Sticky Queue Manager
- * Manages queues for button click events in the sticky window
+ * Boilerplate Queue Manager
+ * Manages queues for button click events in the boilerplate window
  * Extends SharedQueueManager to handle button-to-controller routing
  */
 
 const path = require('path');
-const SharedQueueManager = require('../shared/queue-manager');
+const SharedQueueManager = require('../shared/lifecycle-manager');
 
-class StickyQueueManager extends SharedQueueManager {
+class BoilerplateQueueManager extends SharedQueueManager {
     constructor(windowConfig = {}) {
         super(windowConfig);
         this.buttonOptions = windowConfig.options.buttons || [];
-        console.log(`[StickyQueueManager] Constructor called with buttonOptions:`, this.buttonOptions.length);
+        console.log(`[BoilerplateQueueManager] Constructor called with buttonOptions:`, this.buttonOptions.length);
         // Now initialize queues after buttonOptions is set
         this.initializeQueues();
     }
@@ -21,13 +21,13 @@ class StickyQueueManager extends SharedQueueManager {
      * Creates one queue per unique button-controller pair
      */
     initializeQueues() {
-        console.log(`[StickyQueueManager] Initializing queues from buttonOptions`);
+        console.log(`[BoilerplateQueueManager] Initializing queues from buttonOptions`);
 
         const queueNames = new Set();
 
         for (const button of this.buttonOptions) {
             if (!button.controller) {
-                console.warn(`[StickyQueueManager] Button missing controller configuration`);
+                console.warn(`[BoilerplateQueueManager] Button missing controller configuration`);
                 continue;
             }
 
@@ -39,10 +39,10 @@ class StickyQueueManager extends SharedQueueManager {
         // Create queues
         for (const queueName of queueNames) {
             this.createQueue(queueName);
-            console.log(`[StickyQueueManager] Created queue: ${queueName}`);
+            console.log(`[BoilerplateQueueManager] Created queue: ${queueName}`);
         }
 
-        console.log(`[StickyQueueManager] Queue initialization complete. Total queues: ${queueNames.size}`);
+        console.log(`[BoilerplateQueueManager] Queue initialization complete. Total queues: ${queueNames.size}`);
     }
 
     /**
@@ -54,7 +54,7 @@ class StickyQueueManager extends SharedQueueManager {
         // Find the button configuration
         const button = this.buttonOptions.find(b => b.id === buttonId);
         if (!button) {
-            console.error(`[StickyQueueManager] Button not found: ${buttonId}`);
+            console.error(`[BoilerplateQueueManager] Button not found: ${buttonId}`);
             return;
         }
 
@@ -69,9 +69,9 @@ class StickyQueueManager extends SharedQueueManager {
             timestamp: Date.now()
         };
 
-        console.log(`[StickyQueueManager] Button clicked: ${buttonId}`);
+        console.log(`[BoilerplateQueueManager] Button clicked: ${buttonId}`);
         this.addToQueue(queueName, clickResult);
     }
 }
 
-module.exports = StickyQueueManager;
+module.exports = BoilerplateQueueManager;
