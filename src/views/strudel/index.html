@@ -20,7 +20,6 @@
         </div>
 
         <div class="content">
-            
             <div class="button-container">
                 <button class="window-btn play-btn" id="playBtn" title="play">play</button>
                 <button class="window-btn stop-btn" id="stopBtn" title="stop">stop</button>
@@ -28,10 +27,17 @@
                 <button class="window-btn save-btn" id="saveBtn" title="save">save</button>
                 <button class="window-btn load-btn" id="loadBtn" title="load">load</button>
             </div>
-            <div id="strudel-container"></div>
+            <div id="strudel-container">
+                <div class="strudel-editor-wrap">
+                    <pre class="strudel-mirror" id="strudel-mirror" aria-hidden="true"><code class="language-strudel"></code></pre>
+                    <textarea class="strudel-editor" id="strudel-editor" spellcheck="false" placeholder="Strudel code…"></textarea>
+                </div>
+            </div>
         </div>
     </div>
 
+    <script src="../../../node_modules/prismjs/prism.js"></script>
+    <script src="prism-strudel.js"></script>
     <script src="../shared/window-bar.js"></script>
     <script src="app.js"></script>
 </body>

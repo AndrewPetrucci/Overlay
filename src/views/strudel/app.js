@@ -4,11 +4,55 @@
  * This is the main application logic for the Strudel window.
  */
 
+function registerStrudelGrammar() {
+    if (typeof Prism === 'undefined') return;
+    Prism.languages.strudel = {
+        comment: { pattern: /\/\/.*/, greedy: true },
+        string: [
+            { pattern: /"(?:[^"\\]|\\.)*"/, greedy: true },
+            { pattern: /'(?:[^'\\]|\\.)*'/, greedy: true },
+            { pattern: /`(?:[^`\\]|\\.)*`/, greedy: true },
+        ],
+        number: /%-?\d+|\b\d+\.?\d*\b/,
+        'repl-prefix': /\$:/,
+        keyword: /\b(?:cps|sound|samples|note|stack|struct|every|slow|fast|gain|speed|rev|chord|scale|m|n|s|rand|segment|cat|append|off|layer|superimpose|jux|juxBy|iter|palindrome|rotate|chunk|substruct|ply|trigger|when|fix|linger|early|late|stretch|compress|trunc|iterate|squeeze|slice|fit|scrub|drop|take)\b/,
+        operator: /[.\[\](){},:~@#-]/,
+    };
+}
+
+function loadScript(src) {
+    return new Promise((resolve, reject) => {
+        const s = document.createElement('script');
+        s.src = src;
+        s.onload = () => resolve();
+        s.onerror = () => reject(new Error('Failed to load: ' + src));
+        document.head.appendChild(s);
+    });
+}
+
+function ensurePrism() {
+    if (typeof Prism !== 'undefined' && Prism.languages.strudel) return Promise.resolve();
+    if (typeof Prism !== 'undefined') {
+        registerStrudelGrammar();
+        return Promise.resolve();
+    }
+    console.warn('[StrudelApp] Prism not loaded from static script, loading from CDN…');
+    return loadScript('https://unpkg.com/prismjs@1.29.0/prism.min.js')
+        .then(() => {
+            registerStrudelGrammar();
+            console.log('[StrudelApp] Prism loaded from CDN');
+        })
+        .catch((e) => {
+            console.error('[StrudelApp] Prism CDN fallback failed:', e);
+        });
+}
+
 class StrudelApp {
     constructor() {
         this.strudelInstance = null;
-        this.currentStackedPattern = null; // Track the currently playing stacked pattern
-        this.currentPatterns = []; // Track all currently playing patterns for stopping
+        this.currentStackedPattern = null;
+        this.currentPatterns = [];
+        this._highlightDebounce = null;
         this.initStrudel();
         this.initSaveLoadButtons();
     }
@@ -51,11 +95,10 @@ class StrudelApp {
             this.strudelEvaluate = evaluate;
             this.audioContext = ctx;
             
-            this.initializeStrudelEditor();
+            await this.initializeStrudelEditor();
             console.log('[StrudelApp] Strudel initialized with transpiler');
         } catch (error) {
             console.warn('[StrudelApp] Failed to load Strudel with transpiler, falling back to @strudel/web:', error);
-            // Fallback to simple @strudel/web approach
             this.initStrudelFromWeb();
         }
     }
@@ -64,83 +107,74 @@ class StrudelApp {
      * Fallback: Initialize Strudel using @strudel/web (simpler but may not handle all cases)
      */
     initStrudelFromWeb() {
-        // Check if initStrudel is already available (loaded via script tag)
         if (typeof initStrudel === 'function') {
-            this.initializeStrudelEditor();
+            this.initializeStrudelEditor().catch((e) => console.error('[StrudelApp] initStrudelEditor failed:', e));
             return;
         }
-
-        // Load from CDN
         const script = document.createElement('script');
         script.src = 'https://unpkg.com/@strudel/web@latest';
         script.onload = () => {
             if (typeof initStrudel === 'function') {
-                this.initializeStrudelEditor();
+                this.initializeStrudelEditor().catch((e) => console.error('[StrudelApp] initStrudelEditor failed:', e));
             } else {
                 console.error('[StrudelApp] initStrudel function not available after loading script');
             }
         };
-        script.onerror = () => {
-            console.error('[StrudelApp] Failed to load Strudel from CDN');
-        };
+        script.onerror = () => console.error('[StrudelApp] Failed to load Strudel from CDN');
         document.head.appendChild(script);
     }
 
     /**
-     * Initialize the Strudel editor after Strudel is available
+     * Initialize the Strudel editor after Strudel is available.
+     * Textarea + highlight overlay; syntax coloring via HTML + CSS (Prism tokens).
      */
-    initializeStrudelEditor() {
+    async initializeStrudelEditor() {
         try {
-            // If we have the evaluate function from repl, use it
-            // Otherwise, initialize with initStrudel() if available
+            await ensurePrism();
             if (!this.strudelEvaluate && typeof initStrudel === 'function') {
-                this.strudelInstance = initStrudel({
-                    // prebake: () => samples('github:tidalcycles/dirt-samples')
-                    // We'll load samples dynamically in onStrudelUpdate instead
-                });
+                this.strudelInstance = initStrudel({});
             }
-            
-            // Create a simple code editor in the container
-            const container = document.getElementById('strudel-container');
-            if (container) {
-                container.innerHTML = `
-                    <textarea id="strudel-editor" style="width: 100%; height: 100%; font-family: monospace; padding: 10px; border: none; resize: none; background: #1e1e1e; color: #d4d4d4; box-sizing: border-box;"></textarea>
-                `;
-                
-                // Set up change listener for the textarea
-                const editor = document.getElementById('strudel-editor');
-                if (editor) {
-                    editor.addEventListener('input', () => this.onStrudelUpdate());
-                    editor.addEventListener('change', () => this.onStrudelUpdate());
-                }
-                
-                console.log('[StrudelApp] Strudel editor initialized successfully');
+
+            const textarea = document.getElementById('strudel-editor');
+            const mirror = document.getElementById('strudel-mirror');
+            const code = mirror ? mirror.querySelector('code') : null;
+            if (!textarea || !mirror || !code) {
+                console.warn('[StrudelApp] strudel-editor or strudel-mirror not found');
+                return;
             }
+
+            const self = this;
+            const scheduleHighlight = () => {
+                if (self._highlightDebounce) clearTimeout(self._highlightDebounce);
+                self._highlightDebounce = setTimeout(() => {
+                    self._highlightDebounce = null;
+                    self.updateMirror();
+                }, 80);
+            };
+
+            textarea.addEventListener('input', () => {
+                self.onStrudelUpdate();
+                scheduleHighlight();
+            });
+            textarea.addEventListener('change', () => self.onStrudelUpdate());
+            textarea.addEventListener('scroll', () => self.syncMirrorScroll());
+
+            this.updateMirror();
+            console.log('[StrudelApp] Strudel editor initialized (textarea + overlay)');
         } catch (error) {
             console.error('[StrudelApp] Error initializing Strudel editor:', error);
         }
     }
 
     /**
-     * Called when the textarea content changes
-     * Checks for samples() calls and loads missing samples
+     * Called when the editor content changes.
+     * Checks for samples() calls and loads missing samples.
      */
     onStrudelUpdate() {
         try {
-            const container = document.getElementById('strudel-container');
-            if (!container) {
-                return;
-            }
-
-            const editor = container.querySelector('#strudel-editor') || container.querySelector('textarea');
-            if (!editor) {
-                return;
-            }
-
-            const code = editor.value || '';
-            if (!code.trim()) {
-                return;
-            }
+            const code = this.getEditorContent();
+            if (code === null) return;
+            if (!code.trim()) return;
 
             // Parse code to find all samples() calls
             const samplesRegex = /samples\s*\(\s*['"`]([^'"`]+)['"`]\s*\)/g;
@@ -251,70 +285,80 @@ class StrudelApp {
     }
 
     /**
-     * Get the current content from the textarea inside strudel-container
+     * Sync mirror scroll position to match textarea.
      */
-    async getStrudelContent() {
-        try {
-            const container = document.getElementById('strudel-container');
-            if (!container) {
-                console.warn('[StrudelApp] strudel-container not found');
-                return null;
-            }
-
-            const editor = container.querySelector('#strudel-editor');
-            if (editor) {
-                return editor.value || '';
-            }
-            
-            // Fallback: try to find any textarea in the container
-            const textarea = container.querySelector('textarea');
-            if (textarea) {
-                return textarea.value || '';
-            }
-            
-            console.warn('[StrudelApp] No textarea found in strudel-container');
-            return null;
-        } catch (e) {
-            console.warn('[StrudelApp] Error getting Strudel content:', e);
-            return null;
+    syncMirrorScroll() {
+        const ta = document.getElementById('strudel-editor');
+        const mirror = document.getElementById('strudel-mirror');
+        if (ta && mirror) {
+            mirror.scrollTop = ta.scrollTop;
+            mirror.scrollLeft = ta.scrollLeft;
         }
     }
 
     /**
-     * Set content in the textarea inside strudel-container
+     * Update highlight overlay from textarea content (Prism → mirror).
+     */
+    updateMirror() {
+        const ta = document.getElementById('strudel-editor');
+        const mirror = document.getElementById('strudel-mirror');
+        const code = mirror ? mirror.querySelector('code') : null;
+        if (!ta || !code) return;
+        const raw = ta.value || '';
+        try {
+            if (typeof Prism !== 'undefined' && Prism.languages.strudel) {
+                code.innerHTML = Prism.highlight(raw, Prism.languages.strudel, 'strudel');
+            } else {
+                if (typeof Prism === 'undefined') {
+                    console.warn('[StrudelApp] Prism not loaded; no syntax highlighting.');
+                } else if (!Prism.languages.strudel) {
+                    console.warn('[StrudelApp] Prism strudel grammar not loaded; no syntax highlighting.');
+                }
+                code.textContent = raw;
+            }
+        } catch (e) {
+            console.warn('[StrudelApp] Prism highlight error:', e);
+            code.textContent = raw;
+        }
+        this.syncMirrorScroll();
+    }
+
+    getEditorContent() {
+        const ta = document.getElementById('strudel-editor');
+        if (ta && ta.tagName === 'TEXTAREA') return ta.value || '';
+        return null;
+    }
+
+    setEditorContent(content) {
+        const ta = document.getElementById('strudel-editor');
+        if (!ta || ta.tagName !== 'TEXTAREA') return false;
+        const text = content != null ? String(content) : '';
+        ta.value = text;
+        this.updateMirror();
+        ta.dispatchEvent(new Event('input', { bubbles: true }));
+        ta.dispatchEvent(new Event('change', { bubbles: true }));
+        return true;
+    }
+
+    /**
+     * Get the current content from the editor (TinyMCE or textarea).
+     */
+    async getStrudelContent() {
+        const content = this.getEditorContent();
+        if (content === null) {
+            console.warn('[StrudelApp] No editor found');
+            return null;
+        }
+        return content;
+    }
+
+    /**
+     * Set content in the editor (TinyMCE or textarea).
      */
     async setStrudelContent(content) {
-        try {
-            const container = document.getElementById('strudel-container');
-            if (!container) {
-                console.warn('[StrudelApp] strudel-container not found');
-                return false;
-            }
-
-            const editor = container.querySelector('#strudel-editor');
-            if (editor) {
-                editor.value = content;
-                // Trigger input event
-                editor.dispatchEvent(new Event('input', { bubbles: true }));
-                editor.dispatchEvent(new Event('change', { bubbles: true }));
-                return true;
-            }
-            
-            // Fallback: try to find any textarea in the container
-            const textarea = container.querySelector('textarea');
-            if (textarea) {
-                textarea.value = content;
-                textarea.dispatchEvent(new Event('input', { bubbles: true }));
-                textarea.dispatchEvent(new Event('change', { bubbles: true }));
-                return true;
-            }
-            
-            console.warn('[StrudelApp] No textarea found in strudel-container');
-            return false;
-        } catch (e) {
-            console.warn('[StrudelApp] Error setting Strudel content:', e);
-            return false;
-        }
+        const ok = this.setEditorContent(content);
+        if (!ok) console.warn('[StrudelApp] Could not set editor content');
+        return ok;
     }
 
     /**
@@ -324,19 +368,11 @@ class StrudelApp {
      */
     async playStrudelContent() {
         try {
-            const container = document.getElementById('strudel-container');
-            if (!container) {
-                console.warn('[StrudelApp] strudel-container not found');
+            let code = this.getEditorContent();
+            if (code === null) {
+                console.warn('[StrudelApp] No editor found');
                 return;
             }
-
-            const editor = container.querySelector('#strudel-editor') || container.querySelector('textarea');
-            if (!editor) {
-                console.warn('[StrudelApp] No textarea found');
-                return;
-            }
-
-            let code = editor.value || '';
             if (!code.trim()) {
                 console.warn('[StrudelApp] No code to play');
                 return;

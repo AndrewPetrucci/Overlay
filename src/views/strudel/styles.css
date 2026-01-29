@@ -6,3 +6,68 @@
     flex-direction: column;
     overflow: hidden;
 }
+
+/* --- Textarea + highlight overlay (syntax via HTML + CSS) --- */
+
+.strudel-editor-wrap {
+    position: relative;
+    flex: 1;
+    min-height: 120px;
+    overflow: hidden;
+    background: #1e1e1e;
+}
+
+.strudel-mirror,
+.strudel-editor {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    margin: 0;
+    padding: 10px;
+    font-family: ui-monospace, "Cascadia Code", "Source Code Pro", Menlo, Monaco, "Courier New", monospace;
+    font-size: 14px;
+    line-height: 1.5;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+    overflow: auto;
+    box-sizing: border-box;
+    border: none;
+    outline: none;
+}
+
+.strudel-mirror {
+    z-index: 0;
+    pointer-events: none;
+}
+
+.strudel-mirror code {
+    font-family: inherit;
+    font-size: inherit;
+    line-height: inherit;
+    display: block;
+}
+
+.strudel-editor {
+    z-index: 1;
+    background: transparent;
+    color: transparent;
+    caret-color: #d4d4d4;
+    resize: none;
+}
+
+/* Base and token colors (all syntax styling in CSS) */
+
+.strudel-mirror,
+.strudel-mirror code {
+    background: #1e1e1e;
+    color: #d4d4d4;
+}
+
+.strudel-mirror code .token.comment { color: #8b949e !important; }
+.strudel-mirror code .token.string { color: #98c379 !important; }
+.strudel-mirror code .token.number { color: #569cd6 !important; }
+.strudel-mirror code .token.keyword { color: #d4d4d4 !important; }
+.strudel-mirror code .token.repl-prefix { color: #d4d4d4 !important; }
+.strudel-mirror code .token.operator { color: #d4d4d4 !important; }
