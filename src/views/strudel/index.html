@@ -12,7 +12,10 @@
 <body>
     <div class="container">
         <div class="window-bar interactive-overlay-element" data-window-bar>
-            <div class="window-title">Strudel Overlay</div>
+            <div class="window-bar-left">
+                <span class="window-title">Strudel Overlay</span>
+                <div id="strudel-open-docs" class="strudel-open-docs" data-no-drag></div>
+            </div>
             <div class="button-container">
                 <button class="window-btn minimize-btn" id="minimizeBtn" title="Minimize">−</button>
                 <button class="window-btn close-btn" id="closeBtn" title="Close">×</button>
@@ -25,7 +28,7 @@
                 <button class="window-btn stop-btn" id="stopBtn" title="stop">stop</button>
                 <button class="window-btn update-btn" id="updateBtn" title="update">update</button>
                 <button class="window-btn save-btn" id="saveBtn" title="save">save</button>
-                <button class="window-btn load-btn" id="loadBtn" title="load">load</button>
+                <button class="window-btn open-btn" id="openBtn" title="open">open</button>
             </div>
             <div id="strudel-container">
                 <div class="strudel-editor-wrap">

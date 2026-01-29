@@ -15,11 +15,14 @@
         "test:render": "node test-wheel-playwright.js"
     },
     "author": "Your Name",
-    "license": "MIT",
+    "license": "AGPL-3.0",
     "dependencies": {
         "dotenv": "^16.0.0",
         "express": "^5.2.1",
         "@strudel/core": "^1.0.0",
+        "@strudel/draw": "^1.0.0",
+        "@strudel/mini": "^1.0.0",
+        "@strudel/tonal": "^1.0.0",
         "@strudel/transpiler": "^1.0.0",
         "@strudel/webaudio": "^1.0.0",
         "prismjs": "^1.29.0",

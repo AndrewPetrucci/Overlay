@@ -326,6 +326,37 @@ function registerIpcHandlers() {
         }
     });
 
+    // Strudel: persist open files across runs (stored in app userData)
+    const strudelOpenFilesPath = path.join(app.getPath('userData'), 'strudel-open-files.json');
+    ipcMain.handle('get-strudel-open-files', async () => {
+        try {
+            if (fs.existsSync(strudelOpenFilesPath)) {
+                const data = JSON.parse(fs.readFileSync(strudelOpenFilesPath, 'utf-8'));
+                return {
+                    openFilePaths: Array.isArray(data.openFilePaths) ? data.openFilePaths : [],
+                    activeFilePath: data.activeFilePath ?? null
+                };
+            }
+        } catch (err) {
+            console.warn('[Strudel] Failed to read persisted open files:', err);
+        }
+        return { openFilePaths: [], activeFilePath: null };
+    });
+    ipcMain.handle('set-strudel-open-files', async (event, state) => {
+        try {
+            const dir = path.dirname(strudelOpenFilesPath);
+            if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
+            fs.writeFileSync(strudelOpenFilesPath, JSON.stringify({
+                openFilePaths: state.openFilePaths || [],
+                activeFilePath: state.activeFilePath ?? null
+            }), 'utf-8');
+            return { success: true };
+        } catch (err) {
+            console.warn('[Strudel] Failed to write persisted open files:', err);
+            return { success: false };
+        }
+    });
+
     // Mod integration handlers removed
     ipcMain.handle('get-auto-spin-config', () => {
         return AUTO_SPIN;
