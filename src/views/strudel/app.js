@@ -229,10 +229,14 @@ class StrudelApp {
             textarea.addEventListener('scroll', () => self.syncMirrorScroll());
 
             // Add Ctrl+/ (Cmd+/ on Mac) to toggle comments on selected lines
+            // Add Ctrl+S (Cmd+S on Mac) to save current document
             textarea.addEventListener('keydown', (e) => {
                 if ((e.ctrlKey || e.metaKey) && e.key === '/') {
                     e.preventDefault();
                     self.toggleComments();
+                } else if ((e.ctrlKey || e.metaKey) && e.key === 's') {
+                    e.preventDefault();
+                    self.saveStrudelContent();
                 }
             });
 

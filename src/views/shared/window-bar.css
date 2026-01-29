@@ -47,7 +47,7 @@ html, body {
 
 .window-bar {
     color: #b8c5ff;
-    background: linear-gradient(90deg, rgba(102, 126, 234, 0.6) 0%, rgba(118, 75, 162, 0.6) 100%);
+    background: linear-gradient(90deg, rgba(102, 126, 234, 1) 0%, rgba(118, 75, 162, 1) 100%);
     border-bottom: 1px solid #8fa3ff;
     display: flex;
     align-items: center;
@@ -74,7 +74,7 @@ html, body {
     height: auto;
     padding: 6px 10px;
     border: 1px solid #8fa3ff;
-    background: rgba(102, 126, 234, 0.2);
+    background: rgba(102, 126, 234, 1);
     color: #b8c5ff;
     cursor: pointer;
     font-size: 12px;
@@ -87,20 +87,23 @@ html, body {
 }
 
 .window-btn:hover {
-    background: rgba(102, 126, 234, 0.4);
+    background: rgba(102, 126, 234, 1);
     color: #b8c5ff;
+    opacity: 0.8;
 }
 
 .window-btn:active {
-    background: rgba(102, 126, 234, 0.6);
+    background: rgba(102, 126, 234, 1);
     transform: scale(0.95);
+    opacity: 0.7;
 }
 
 .close-btn:hover {
-    background: rgba(244, 67, 54, 0.3);
-    color: #f44336;
+    background: rgba(244, 67, 54, 1);
+    color: #ffffff;
 }
 
 .close-btn:active {
-    background: rgba(244, 67, 54, 0.5);
+    background: rgba(244, 67, 54, 1);
+    opacity: 0.8;
 }

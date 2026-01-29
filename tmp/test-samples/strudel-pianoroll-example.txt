@@ -3,7 +3,7 @@
 
 samples('github:tidalcycles/dirt-samples')
 
-// Pattern with pianoroll visualization
+// Pattern with pianoroll visualizationsss
 // The _pianoroll() function will render a visual timeline of the pattern
 $: note("c e g c5 e5 g5 c4 e4 g4")
   .s("sawtooth")
