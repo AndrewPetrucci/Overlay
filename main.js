@@ -265,10 +265,14 @@ function registerIpcHandlers() {
 
     ipcMain.on('resize-window', (event, { width, height }) => {
         const window = getWindowFromEvent(event);
-        if (window) {
-            window.setSize(width, height);
-            // Update stored dimensions using helper function
-            setStoredWindowDimensions(window, width, height);
+        if (window && !window.isDestroyed()) {
+            const w = Math.round(Number(width));
+            const h = Math.round(Number(height));
+            if (w >= 100 && h >= 100) {
+                const bounds = window.getBounds();
+                window.setBounds({ x: bounds.x, y: bounds.y, width: w, height: h });
+                setStoredWindowDimensions(window, w, h);
+            }
         }
     });
 
@@ -382,6 +386,25 @@ function registerIpcHandlers() {
         const window = getWindowFromEvent(event);
         if (window) {
             window.minimize();
+        }
+    });
+
+    ipcMain.on('maximize-window', (event) => {
+        const window = getWindowFromEvent(event);
+        if (window) {
+            if (window.isMaximized()) {
+                window.unmaximize();
+            } else {
+                window.maximize();
+            }
+            event.sender.send('window-maximized', { maximized: window.isMaximized() });
+        }
+    });
+
+    ipcMain.on('get-window-maximized', (event) => {
+        const window = getWindowFromEvent(event);
+        if (window) {
+            event.returnValue = { maximized: window.isMaximized() };
         }
     });
 

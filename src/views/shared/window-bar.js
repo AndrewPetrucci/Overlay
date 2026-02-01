@@ -25,6 +25,7 @@ class WindowBar {
         this.initialWindowWidth = 0;
         this.initialWindowHeight = 0;
         this.minimizeBtn = element.querySelector('.minimize-btn');
+        this.maximizeBtn = element.querySelector('.maximize-btn');
         this.closeBtn = element.querySelector('.close-btn');
 
         this.init();
@@ -40,6 +41,9 @@ class WindowBar {
         this.element.setAttribute('tabindex', '-1');
         if (this.minimizeBtn) {
             this.minimizeBtn.setAttribute('tabindex', '-1');
+        }
+        if (this.maximizeBtn) {
+            this.maximizeBtn.setAttribute('tabindex', '-1');
         }
         if (this.closeBtn) {
             this.closeBtn.setAttribute('tabindex', '-1');
@@ -58,9 +62,30 @@ class WindowBar {
         if (this.minimizeBtn) {
             this.minimizeBtn.addEventListener('click', () => this.minimize());
         }
+        if (this.maximizeBtn) {
+            this.maximizeBtn.addEventListener('click', () => this.maximize());
+            this.updateMaximizeButton();
+            if (window.electron && window.electron.onWindowMaximized) {
+                window.electron.onWindowMaximized((data) => this.updateMaximizeButton(data && data.maximized));
+            }
+        }
         if (this.closeBtn) {
             this.closeBtn.addEventListener('click', () => this.close());
         }
+    }
+
+    updateMaximizeButton(maximized) {
+        if (!this.maximizeBtn) return;
+        if (maximized === undefined && window.electron && window.electron.getWindowMaximized) {
+            const result = window.electron.getWindowMaximized();
+            maximized = result && result.maximized;
+        }
+        const maximizeIcon = this.maximizeBtn.querySelector('.maximize-icon');
+        const restoreIcon = this.maximizeBtn.querySelector('.restore-icon');
+        if (maximizeIcon) maximizeIcon.hidden = !!maximized;
+        if (restoreIcon) restoreIcon.hidden = !maximized;
+        this.maximizeBtn.title = maximized ? 'Restore' : 'Maximize';
+        this.maximizeBtn.setAttribute('aria-label', maximized ? 'Restore' : 'Maximize');
     }
 
     onMouseEnter() {
@@ -128,6 +153,12 @@ class WindowBar {
     minimize() {
         if (window.electron && window.electron.minimizeWindow) {
             window.electron.minimizeWindow();
+        }
+    }
+
+    maximize() {
+        if (window.electron && window.electron.maximizeWindow) {
+            window.electron.maximizeWindow();
         }
     }
 

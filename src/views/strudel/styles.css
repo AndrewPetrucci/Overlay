@@ -195,6 +195,116 @@
     display: block;
 }
 
+/* Settings button and panel (window width/height) */
+.window-bar-right {
+    position: relative;
+}
+
+.settings-wrap {
+    position: relative;
+}
+
+.settings-btn .strudel-tool-icon {
+    width: 14px;
+    height: 14px;
+    display: block;
+}
+
+.settings-panel {
+    position: absolute;
+    top: 100%;
+    right: 0;
+    margin-top: 4px;
+    padding: 10px 12px;
+    background: linear-gradient(180deg, rgba(37, 37, 38, 0.98) 0%, rgba(30, 30, 31, 0.98) 100%);
+    border: 1px solid #8fa3ff;
+    border-radius: 6px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+    z-index: 1000;
+    min-width: 180px;
+}
+
+.settings-filter-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 6px;
+}
+
+.settings-filter {
+    flex: 1;
+    min-width: 0;
+    padding: 4px 6px;
+    font-size: 12px;
+    font-family: inherit;
+    color: #b8c5ff;
+    background: rgba(0, 0, 0, 0.3);
+    border: 1px solid #8fa3ff;
+    border-radius: 4px;
+    box-sizing: border-box;
+}
+
+.settings-filter::placeholder {
+    color: rgba(184, 197, 255, 0.5);
+}
+
+.settings-filter:focus {
+    outline: none;
+    border-color: #b8c5ff;
+}
+
+.settings-row-count {
+    flex-shrink: 0;
+    font-size: 11px;
+    color: rgba(184, 197, 255, 0.8);
+}
+
+.settings-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 12px;
+    color: #b8c5ff;
+    margin-bottom: 8px;
+}
+
+.settings-table th {
+    text-align: left;
+    padding: 4px 8px 4px 0;
+    font-weight: 600;
+}
+
+.settings-table td {
+    padding: 4px 0;
+}
+
+.settings-table input {
+    width: 72px;
+    padding: 4px 6px;
+    font-size: 12px;
+    font-family: inherit;
+    color: #b8c5ff;
+    background: rgba(0, 0, 0, 0.3);
+    border: 1px solid #8fa3ff;
+    border-radius: 4px;
+    box-sizing: border-box;
+}
+
+.settings-table input:focus {
+    outline: none;
+    border-color: #b8c5ff;
+}
+
+.settings-actions {
+    display: flex;
+    gap: 8px;
+    margin-top: 8px;
+}
+
+.close-settings-btn,
+.apply-settings-btn {
+    flex: 1;
+}
+
 /* Visualizations inserted into the editor wrap - positioned absolutely */
 .strudel-editor-wrap .strudel-pattern-visualization {
     position: absolute;

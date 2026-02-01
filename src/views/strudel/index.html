@@ -36,9 +36,35 @@
                 </div>
                 <div id="strudel-open-docs" class="strudel-open-docs" data-no-drag></div>
             </div>
-            <div class="button-container">
-                <button class="window-btn minimize-btn" id="minimizeBtn" title="Minimize">−</button>
-                <button class="window-btn close-btn" id="closeBtn" title="Close">×</button>
+            <div class="button-container window-bar-right">
+                <div class="settings-wrap">
+                    <button class="window-btn settings-btn" id="settingsBtn" title="Settings" aria-expanded="false" aria-haspopup="true">
+                        <svg class="strudel-tool-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-2 2 2 2 0 01-2-2v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83 0 2 2 0 010-2.83l.06-.06a1.65 1.65 0 00.33-1.82 1.65 1.65 0 00-1.51-1H3a2 2 0 01-2-2 2 2 0 012-2h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 010-2.83 2 2 0 012.83 0l.06.06a1.65 1.65 0 001.82.33H9a1.65 1.65 0 001-1.51V3a2 2 0 012-2 2 2 0 012 2v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 0 2 2 0 010 2.83l-.06.06a1.65 1.65 0 00-.33 1.82V9a1.65 1.65 0 001.51 1H21a2 2 0 012 2 2 2 0 01-2 2h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
+                    </button>
+                    <div id="settingsPanel" class="settings-panel" hidden aria-label="Window settings" data-no-drag>
+                        <div class="settings-filter-row">
+                            <input type="text" id="settingsFilter" class="settings-filter" placeholder="Filter…" aria-label="Filter settings rows" />
+                            <span id="settingsRowCount" class="settings-row-count" aria-live="polite"></span>
+                        </div>
+                        <table class="settings-table">
+                            <tbody id="settingsTableBody"></tbody>
+                        </table>
+                        <div class="settings-actions">
+                            <button type="button" class="window-btn close-settings-btn" id="closeSettingsBtn">Close</button>
+                            <button type="button" class="window-btn apply-settings-btn" id="applySettingsBtn">Apply</button>
+                        </div>
+                    </div>
+                </div>
+                <button class="window-btn minimize-btn" id="minimizeBtn" title="Minimize" aria-label="Minimize">
+                    <svg class="window-bar-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"/></svg>
+                </button>
+                <button class="window-btn maximize-btn" id="maximizeBtn" title="Maximize" aria-label="Maximize">
+                    <svg class="window-bar-icon maximize-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="4" width="16" height="16" rx="1"/></svg>
+                    <svg class="window-bar-icon restore-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" hidden><path d="M8 4H6a2 2 0 00-2 2v2"/><path d="M16 4h2a2 2 0 012 2v2"/><path d="M4 16v2a2 2 0 002 2h2"/><path d="M20 16v2a2 2 0 01-2 2h-2"/></svg>
+                </button>
+                <button class="window-btn close-btn" id="closeBtn" title="Close" aria-label="Close">
+                    <svg class="window-bar-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6L6 18"/><path d="M6 6l12 12"/></svg>
+                </button>
             </div>
         </div>
 

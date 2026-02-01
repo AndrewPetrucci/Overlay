@@ -5,6 +5,7 @@
  */
 
 import * as strudelParse from './strudel-parse.cjs';
+import { initSettingsPanel as initSettingsPanelShared, DEFAULT_SETTINGS_FIELDS } from '../shared/settings-panel.js';
 
 /**
  * Open documents data structure.
@@ -41,6 +42,7 @@ const STRUDEL_DOCS = {
     /* Audio effects: https://strudel.cc/learn/effects/ */
     gain: { summary: 'Volume: multiply amplitude, e.g. .gain(.5).', link: 'https://strudel.cc/learn/effects/#gain' },
     lpf: { summary: 'Low-pass filter: .lpf(2000).lpfq(4).', link: 'https://strudel.cc/learn/effects/#lpf' },
+    lpq: { summary: 'Low-pass filter Q (resonance): .lpq(4) or .lpfq(4).', link: 'https://strudel.cc/learn/effects/#lpq' },
     hpf: { summary: 'High-pass filter.', link: 'https://strudel.cc/learn/effects/#hpf' },
     bpf: { summary: 'Band-pass filter.', link: 'https://strudel.cc/learn/effects/#bpf' },
     vowel: { summary: 'Vowel filter: .vowel("a e i o u").', link: 'https://strudel.cc/learn/effects/#vowel' },
@@ -177,6 +179,7 @@ class StrudelApp {
         this._untitledCounter = 0;
         this.initStrudel();
         this.initSaveLoadButtons();
+        this.initSettingsPanel();
     }
 
     /**
@@ -600,6 +603,54 @@ class StrudelApp {
         this.renderOpenDocs();
 
         window.addEventListener('beforeunload', () => this.persistOpenFiles());
+    }
+
+    /**
+     * Initialize settings button and panel. Uses shared initSettingsPanel with shared + strudel settings-fields.json.
+     */
+    initSettingsPanel() {
+        initSettingsPanelShared({
+            getFields: async () => {
+                let sharedFields = DEFAULT_SETTINGS_FIELDS;
+                try {
+                    const sharedUrl = new URL('../shared/settings-fields.json', window.location.href).href;
+                    const sharedRes = await fetch(sharedUrl);
+                    if (sharedRes.ok) {
+                        const loaded = await sharedRes.json();
+                        if (Array.isArray(loaded) && loaded.length > 0 && loaded.every((f) => f.id && f.label)) {
+                            sharedFields = loaded;
+                        }
+                    }
+                } catch (e) {
+                    console.warn('[StrudelApp] Could not load shared settings-fields.json, using defaults:', e?.message || e);
+                }
+                let strudelFields = [];
+                try {
+                    const strudelUrl = new URL('settings-fields.json', window.location.href).href;
+                    const strudelRes = await fetch(strudelUrl);
+                    if (strudelRes.ok) {
+                        const loaded = await strudelRes.json();
+                        if (Array.isArray(loaded) && loaded.every((f) => f.id && f.label)) {
+                            strudelFields = loaded;
+                        }
+                    }
+                } catch (e) {
+                    console.warn('[StrudelApp] Could not load strudel settings-fields.json:', e?.message || e);
+                }
+                return [...sharedFields, ...strudelFields];
+            },
+            getValues: () => (window.electron && typeof window.electron.getWindowPosition === 'function' ? window.electron.getWindowPosition() : null),
+            applyValues: (values) => {
+                if (window.electron?.moveWindowTo) {
+                    window.electron.moveWindowTo(values.x, values.y, values.width, values.height);
+                }
+            },
+            validate: (values) => {
+                const { x, y, width, height } = values;
+                return Number.isFinite(x) && Number.isFinite(y) && Number.isFinite(width) && width >= 100 && Number.isFinite(height) && height >= 100;
+            },
+            logLabel: 'StrudelApp',
+        });
     }
 
     /**

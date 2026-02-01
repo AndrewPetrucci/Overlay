@@ -206,7 +206,7 @@
     "defaults": {
         "width": 1600,
         "height": 900,
-        "alwaysOnTop": true,
+        "alwaysOnTop": false,
         "transparent": true,
         "frame": false,
         "resizable": false,
