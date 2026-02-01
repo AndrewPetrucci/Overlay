@@ -1,0 +1,21 @@
+// LPF (low-pass filter) test
+// Hear the filter: bright saw without LPF vs. same with LPF cutting highs.
+//
+// Where LPF comes from:
+// - Pattern API: @strudel/core (controls: .lpf(freq), .lpq(resonance), .ftype('ladder'|'12db'|'24db'))
+// - Audio: superdough (cutoff → lpf node frequency; createFilter → BiquadFilter or ladder-processor)
+// - DSP: superdough/worklets.mjs → LadderProcessor (AudioWorklet) when .ftype('ladder')
+//
+setcps(0.5)
+
+// Test 1: Saw with fixed LPF — should sound duller (highs cut at 800 Hz)
+s("saw").note("c2").lpf(800).lpq(2)
+
+// Test 2: Uncomment to compare — no LPF (full brightness)
+// s("saw").note("c2")
+
+// Test 3: LPF sweep (cutoff moves 400 → 2000 over 8 cycles) — hear filter open/close
+// s("saw").note("c2").lpf(sine.range(400,2000).slow(8)).lpq(3)
+
+// Test 4: Ladder filter (more character; requires worklet)
+// s("saw").note("c2").lpf(600).lpq(1).ftype('ladder')

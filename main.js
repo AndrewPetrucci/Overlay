@@ -326,6 +326,22 @@ function registerIpcHandlers() {
         }
     });
 
+    ipcMain.handle('rename-file', async (event, filePath, newName) => {
+        if (!filePath || !newName || typeof newName !== 'string') {
+            return { success: false, error: 'Invalid arguments' };
+        }
+        try {
+            const dir = path.dirname(filePath);
+            const ext = path.extname(filePath);
+            const name = newName.trim();
+            const newPath = path.join(dir, name.includes('.') ? name : name + ext);
+            fs.renameSync(filePath, newPath);
+            return { success: true, newFilePath: newPath };
+        } catch (error) {
+            return { success: false, error: error.message };
+        }
+    });
+
     // Strudel: persist open files across runs (stored in app userData)
     const strudelOpenFilesPath = path.join(app.getPath('userData'), 'strudel-open-files.json');
     ipcMain.handle('get-strudel-open-files', async () => {

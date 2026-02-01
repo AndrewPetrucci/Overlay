@@ -72,8 +72,19 @@ Aggregates results and creates report
 
 - **test-wheel.js** - Main test harness
 - **electron-test-main.js** - Electron app in test mode
+- **test/strudel-parse.test.js** - Unit tests for Strudel parsing and segment mapping (no Electron)
 - Uses existing files:
   - application-config-loader.js for configuration
+
+### Strudel parse tests (no app in the loop)
+
+Strudel parsing and highlight-mapping logic can be tested without starting Electron:
+
+```bash
+npm run test:strudel
+```
+
+This runs `node test/strudel-parse.test.js` against `src/views/strudel/strudel-parse.cjs`. The same module is used by the Strudel view (`app.js`), so changes to parsing/continuation/segment mapping are covered by these tests.
 
 ## Troubleshooting
 

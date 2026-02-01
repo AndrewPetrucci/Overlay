@@ -140,6 +140,7 @@ function addCoreAPIs(apiDefinitions) {
         showOpenDialog: invokeWithArgs('show-open-dialog', 'options'),
         writeFile: invokeWithArgs('write-file', 'filePath, content'),
         readFile: invokeWithArgs('read-file', 'filePath'),
+        renameFile: invokeWithArgs('rename-file', 'filePath, newName'),
         getStrudelOpenFiles: invoke('get-strudel-open-files'),
         setStrudelOpenFiles: invokeWithArgs('set-strudel-open-files', 'state'),
         // Wheel APIs (handled in main.js)

@@ -21,6 +21,7 @@ contextBridge.exposeInMainWorld('electron', {
     onTwitchSpinTriggered: (callback) => ipcRenderer.on("twitch-spin-triggered", () => callback()),
     onTwitchStatusChanged: (callback) => ipcRenderer.on("twitch-status-changed", (event, data) => callback(data)),
     readFile: (filePath) => ipcRenderer.invoke("read-file", filePath),
+    renameFile: (filePath, newName) => ipcRenderer.invoke("rename-file", filePath, newName),
     resizeWindow: (width, height) => ipcRenderer.send("resize-window", {width: width, height: height}),
     sendMessage: (channel, data) => ipcRenderer.send(channel, data),
     setStrudelOpenFiles: (state) => ipcRenderer.invoke("set-strudel-open-files", state),

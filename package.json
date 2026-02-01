@@ -15,7 +15,8 @@
         "postbuild": "powershell -ExecutionPolicy Bypass -File ./bundle-venv.ps1",
         "pretest": "start npm start",
         "test": "node test-wheel.js",
-        "test:render": "node test-wheel-playwright.js"
+        "test:render": "node test-wheel-playwright.js",
+        "test:strudel": "node test/strudel-parse.test.js"
     },
     "author": "Your Name",
     "license": "AGPL-3.0",
