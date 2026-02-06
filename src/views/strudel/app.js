@@ -312,13 +312,27 @@ class StrudelApp {
                 getTime: () => ctx.currentTime,
                 transpiler,
                 afterEval: (options) => {
-                    if (self.cmView && options.meta?.miniLocations != null && self.strudelTranspiler) {
+                    if (options.meta?.miniLocations == null) return;
+                    if (self._playingFromPallet && self._playingPalletView) {
+                        self._applyPalletMiniLocationsAndMap(options.meta.miniLocations);
+                    } else if (self.cmView && self.strudelTranspiler) {
                         self._applyEditorMiniLocationsAndMap(options.meta.miniLocations);
                     }
                 },
                 onToggle: (started) => {
-                    if (started) self.startHighlightLoop();
-                    else self.stopHighlightLoop();
+                    if (started) {
+                        if (self._playingFromPallet && self._playingPalletView) self.startPalletHighlightLoop();
+                        else if (!self._playingFromPallet) self.startHighlightLoop();
+                    } else {
+                        self.stopPalletHighlightLoop();
+                        self._playingFromPallet = false;
+                        self._playingPalletView = null;
+                        if (self._cycleStopTimeoutId != null) {
+                            clearTimeout(self._cycleStopTimeoutId);
+                            self._cycleStopTimeoutId = null;
+                        }
+                        self.stopHighlightLoop();
+                    }
                 },
             });
 
@@ -767,10 +781,12 @@ class StrudelApp {
             labelEl.className = 'pallet-example-label';
             labelEl.textContent = ex.label ?? ex.id ?? 'Untitled';
             main.appendChild(labelEl);
+            let viewIndex = -1;
             if (ex.code) {
                 const codeMount = document.createElement('div');
                 codeMount.className = 'pallet-example-cm-container';
                 main.appendChild(codeMount);
+                viewIndex = mounts.length;
                 mounts.push({ el: codeMount, code: ex.code });
             }
             li.appendChild(main);
@@ -781,7 +797,7 @@ class StrudelApp {
             playBtn.className = 'pallet-example-btn pallet-example-play';
             playBtn.title = 'Play';
             playBtn.textContent = 'Play';
-            playBtn.addEventListener('click', () => this.playExampleCode(ex.code));
+            playBtn.addEventListener('click', () => this.playExampleCode(ex.code, viewIndex));
             const copyBtn = document.createElement('button');
             copyBtn.type = 'button';
             copyBtn.className = 'pallet-example-btn pallet-example-copy';
@@ -807,24 +823,27 @@ class StrudelApp {
      */
     async createPalletExampleCodeMirror(container, code) {
         try {
-            const [stateMod, viewMod, langJs, langMod] = await Promise.all([
+            const [stateMod, viewMod, langJs, langMod, strudelCm] = await Promise.all([
                 import('@codemirror/state'),
                 import('@codemirror/view'),
                 import('@codemirror/lang-javascript'),
                 import('@codemirror/language'),
+                import('@strudel/codemirror').then((m) => m.highlightExtension).catch(() => null),
             ]);
             const { EditorState } = stateMod;
             const { EditorView } = viewMod;
             const { javascript } = langJs;
             const { defaultHighlightStyle, syntaxHighlighting } = langMod;
+            const extensions = [
+                javascript(),
+                syntaxHighlighting(defaultHighlightStyle),
+                EditorView.editable.of(false),
+                EditorView.lineWrapping,
+            ];
+            if (Array.isArray(strudelCm)) extensions.push(...strudelCm);
             const state = EditorState.create({
                 doc: code,
-                extensions: [
-                    javascript(),
-                    syntaxHighlighting(defaultHighlightStyle),
-                    EditorView.editable.of(false),
-                    EditorView.lineWrapping,
-                ],
+                extensions,
             });
             const view = new EditorView({
                 state,
@@ -843,11 +862,15 @@ class StrudelApp {
 
     /**
      * Play a single example code snippet programmatically (does not use or change the editor).
-     * Plays one cycle then stops.
+     * Plays one cycle then stops. When palletViewIndex >= 0, highlighting is applied to that pallet example's CodeMirror.
      * @param {string} code - Example code to play
+     * @param {number} [palletViewIndex] - Index into _palletExampleViews for the example being played (-1 or omitted = no pallet highlighting)
      */
-    async playExampleCode(code) {
+    async playExampleCode(code, palletViewIndex) {
         if (!code || !code.trim()) return;
+        this._playingPalletView = (palletViewIndex >= 0 && this._palletExampleViews && this._palletExampleViews[palletViewIndex])
+            ? this._palletExampleViews[palletViewIndex]
+            : null;
         await this.playStrudelContent(code, 1);
     }
 
@@ -1685,6 +1708,56 @@ class StrudelApp {
     }
 
     /**
+     * Map codeToEval mini locations to the currently playing pallet view's document and apply them.
+     * Used when playing from the pallet so highlighting appears on that example's CodeMirror.
+     * Sets _playCodeToPalletMap for the pallet highlight loop.
+     */
+    _applyPalletMiniLocationsAndMap(playCodeMiniLocations) {
+        if (!this._playingPalletView) return;
+        const palletDoc = this._playingPalletView.state.doc.toString();
+        const palletDocLen = palletDoc.length;
+        const playCodeStart = this._playCodeOffsetInCodeToEval ?? 0;
+        const [storedPlayStart, storedPlayEnd] = this._lastPlayCodeRange ?? [0, 0];
+        const playCodeLen = storedPlayEnd - storedPlayStart;
+
+        const playCodeToPalletMap = new Map();
+        const docLocations = [];
+
+        const norm = (loc) => {
+            if (Array.isArray(loc)) return [loc[0], loc[1]];
+            const f = loc?.from ?? loc?.start ?? loc?.[0];
+            const t = loc?.to ?? loc?.end ?? loc?.[1];
+            return [f, t];
+        };
+
+        for (const loc of playCodeMiniLocations || []) {
+            const [pcFrom, pcTo] = norm(loc);
+            if (pcFrom == null || pcTo == null) continue;
+            if (pcFrom < playCodeStart || pcTo > playCodeStart + playCodeLen) continue;
+            const localFrom = Math.max(0, Math.min(pcFrom - playCodeStart, palletDocLen));
+            const localTo = Math.max(localFrom, Math.min(pcTo - playCodeStart, palletDocLen));
+            if (localFrom >= localTo) continue;
+            const key = `${pcFrom}:${pcTo}`;
+            playCodeToPalletMap.set(key, { start: localFrom, end: localTo });
+            docLocations.push([localFrom, localTo]);
+        }
+
+        this._playCodeToPalletMap = playCodeToPalletMap;
+
+        const seen = new Set();
+        const unique = docLocations.filter(([from, to]) => {
+            const k = `${from}:${to}`;
+            if (seen.has(k)) return false;
+            seen.add(k);
+            return true;
+        });
+
+        import('@strudel/codemirror').then(({ updateMiniLocations }) => {
+            updateMiniLocations(this._playingPalletView, unique);
+        });
+    }
+
+    /**
      * True if the line is setup-only (not a pattern to play).
      */
     isSetupOnlyLine(trimmed) {
@@ -1914,6 +1987,11 @@ class StrudelApp {
      * @param {number|undefined} [cycles] - If a positive number, stop playback after this many cycles (default cycle = 2s). If undefined, play until stopped.
      */
     async playStrudelContent(codeToPlay, cycles) {
+        this._playingFromPallet = codeToPlay != null;
+        if (this._cycleStopTimeoutId != null) {
+            clearTimeout(this._cycleStopTimeoutId);
+            this._cycleStopTimeoutId = null;
+        }
         try {
             const code = codeToPlay != null ? codeToPlay : this.getEditorContent();
             if (code === null) {
@@ -1994,7 +2072,10 @@ class StrudelApp {
                         console.log('[StrudelApp] Patterns evaluated + playing via evaluate()');
                         await this.startVizDrawerIfNeeded();
                         if (typeof cycles === 'number' && cycles > 0 && typeof this.strudelStop === 'function') {
-                            setTimeout(() => this.strudelStop(), cycles * StrudelApp.CYCLE_MS);
+                            this._cycleStopTimeoutId = setTimeout(() => {
+                                this._cycleStopTimeoutId = null;
+                                this.strudelStop();
+                            }, cycles * StrudelApp.CYCLE_MS);
                         }
                     } catch (error) {
                         console.error(`[StrudelApp] Error evaluating patterns via evaluate():`, error);
@@ -2102,7 +2183,10 @@ class StrudelApp {
                                 console.log(`[StrudelApp] All patterns started playing via stack()`);
                                 await this.startVizDrawerIfNeeded();
                                 if (typeof cycles === 'number' && cycles > 0 && typeof this.strudelStop === 'function') {
-                                    setTimeout(() => this.strudelStop(), cycles * StrudelApp.CYCLE_MS);
+                                    this._cycleStopTimeoutId = setTimeout(() => {
+                                        this._cycleStopTimeoutId = null;
+                                        this.strudelStop();
+                                    }, cycles * StrudelApp.CYCLE_MS);
                                 }
                             } else {
                                 // Fallback: play each pattern individually if stack() is not available
@@ -2120,7 +2204,10 @@ class StrudelApp {
                                     }
                                 });
                                 if (typeof cycles === 'number' && cycles > 0 && typeof this.strudelStop === 'function') {
-                                    setTimeout(() => this.strudelStop(), cycles * StrudelApp.CYCLE_MS);
+                                    this._cycleStopTimeoutId = setTimeout(() => {
+                                        this._cycleStopTimeoutId = null;
+                                        this.strudelStop();
+                                    }, cycles * StrudelApp.CYCLE_MS);
                                 }
                             }
                         } catch (error) {
@@ -2405,6 +2492,10 @@ class StrudelApp {
     async stopStrudelContent() {
         try {
             this.stopHighlightLoop();
+            if (this._cycleStopTimeoutId != null) {
+                clearTimeout(this._cycleStopTimeoutId);
+                this._cycleStopTimeoutId = null;
+            }
             // Stop the scheduler (stops audio and pattern evaluation)
             if (typeof this.strudelStop === 'function') {
                 this.strudelStop();
@@ -2487,6 +2578,73 @@ class StrudelApp {
             import('@strudel/codemirror').then(({ updateMiniLocations, highlightMiniLocations }) => {
                 updateMiniLocations(this.cmView, []);
                 highlightMiniLocations(this.cmView, 0, []);
+            });
+        }
+    }
+
+    /**
+     * Start the highlight loop for the currently playing pallet example's CodeMirror.
+     * Uses _playingPalletView and _playCodeToPalletMap (set by _applyPalletMiniLocationsAndMap).
+     */
+    startPalletHighlightLoop() {
+        this.stopPalletHighlightLoop();
+        const palletView = this._playingPalletView;
+        if (!palletView) return;
+        let highlightMiniLocationsFn = null;
+        const loop = () => {
+            if (!this.strudelScheduler || !this.strudelScheduler.started || !this._playingPalletView) {
+                this._palletHighlightRAF = requestAnimationFrame(loop);
+                return;
+            }
+            const time = this.strudelScheduler.now();
+            const pattern = this.strudelScheduler.pattern;
+            if (!pattern || typeof pattern.queryArc !== 'function') {
+                this._palletHighlightRAF = requestAnimationFrame(loop);
+                return;
+            }
+            const haps = pattern.queryArc(time - 0.1, time + 0.1) || [];
+            const activeHaps = haps.filter((h) => h && typeof h.isActive === 'function' && h.isActive(time));
+            const map = this._playCodeToPalletMap;
+            const hapsWithDocLocations = map ? activeHaps.map((hap) => {
+                const locs = hap.context?.locations || [];
+                const newLocs = locs.map((loc) => {
+                    const start = loc?.start ?? loc?.[0];
+                    const end = loc?.end ?? loc?.[1];
+                    if (start == null || end == null) return null;
+                    return map.get(`${start}:${end}`);
+                }).filter(Boolean);
+                if (newLocs.length === 0) return null;
+                return { ...hap, context: { ...hap.context, locations: newLocs } };
+            }).filter(Boolean) : activeHaps;
+            const view = this._playingPalletView;
+            if (view) {
+                if (highlightMiniLocationsFn) {
+                    highlightMiniLocationsFn(view, time, hapsWithDocLocations);
+                } else {
+                    import('@strudel/codemirror').then(({ highlightMiniLocations }) => {
+                        highlightMiniLocationsFn = highlightMiniLocations;
+                        highlightMiniLocations(view, time, hapsWithDocLocations);
+                    });
+                }
+            }
+            this._palletHighlightRAF = requestAnimationFrame(loop);
+        };
+        this._palletHighlightRAF = requestAnimationFrame(loop);
+    }
+
+    /**
+     * Stop the pallet highlight loop and clear decorations on the pallet view.
+     */
+    stopPalletHighlightLoop() {
+        if (this._palletHighlightRAF != null) {
+            cancelAnimationFrame(this._palletHighlightRAF);
+            this._palletHighlightRAF = null;
+        }
+        if (this._playingPalletView) {
+            const view = this._playingPalletView;
+            import('@strudel/codemirror').then(({ updateMiniLocations, highlightMiniLocations }) => {
+                updateMiniLocations(view, []);
+                highlightMiniLocations(view, 0, []);
             });
         }
     }
