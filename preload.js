@@ -24,6 +24,7 @@ contextBridge.exposeInMainWorld('electron', {
     onTwitchStatusChanged: (callback) => ipcRenderer.on("twitch-status-changed", (event, data) => callback(data)),
     onWindowMaximized: (callback) => ipcRenderer.on("window-maximized", (event, data) => callback(data)),
     readFile: (filePath) => ipcRenderer.invoke("read-file", filePath),
+    readSamplePack: (packName) => ipcRenderer.invoke("read-sample-pack", packName),
     renameFile: (filePath, newName) => ipcRenderer.invoke("rename-file", filePath, newName),
     resizeWindow: (width, height) => ipcRenderer.send("resize-window", {width: width, height: height}),
     sendMessage: (channel, data) => ipcRenderer.send(channel, data),

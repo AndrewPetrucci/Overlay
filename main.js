@@ -332,6 +332,20 @@ function registerIpcHandlers() {
         }
     });
 
+    // Strudel: load sample pack JSON from local sample-packs/ (no HTTP for map; audio still uses _base URL)
+    ipcMain.handle('read-sample-pack', async (event, packName) => {
+        try {
+            const safeName = path.basename(packName).replace(/[^a-zA-Z0-9-_]/g, '');
+            if (!safeName) return { success: false, error: 'Invalid pack name' };
+            const packPath = path.join(__dirname, 'src', 'views', 'strudel', 'sample-packs', safeName + '.json');
+            const content = fs.readFileSync(packPath, 'utf-8');
+            const json = JSON.parse(content);
+            return { success: true, json };
+        } catch (error) {
+            return { success: false, error: error.message };
+        }
+    });
+
     ipcMain.handle('rename-file', async (event, filePath, newName) => {
         if (!filePath || !newName || typeof newName !== 'string') {
             return { success: false, error: 'Invalid arguments' };

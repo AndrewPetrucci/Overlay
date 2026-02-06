@@ -146,6 +146,7 @@ function addCoreAPIs(apiDefinitions) {
         renameFile: invokeWithArgs('rename-file', 'filePath, newName'),
         getStrudelOpenFiles: invoke('get-strudel-open-files'),
         setStrudelOpenFiles: invokeWithArgs('set-strudel-open-files', 'state'),
+        readSamplePack: invokeWithArgs('read-sample-pack', 'packName'),
         // Wheel APIs (handled in main.js)
         spinWheel: send('spin-wheel', 'result', true), // Send result directly, don't wrap
         onSpinResult: on('spin-result'),

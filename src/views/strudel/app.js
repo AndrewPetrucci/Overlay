@@ -264,7 +264,7 @@ class StrudelApp {
             if (typeof setTime === 'function') setTime(() => 0);
             const { transpiler } = strudelTranspiler;
             this.strudelTranspiler = transpiler;
-            const { getAudioContext, webaudioOutput, initAudioOnFirstClick, registerSynthSounds } = strudelWebaudio;
+            const { getAudioContext, webaudioOutput, initAudioOnFirstClick, registerSynthSounds, registerSamplesPrefix } = strudelWebaudio;
 
             // Initialize audio context
             const ctx = getAudioContext();
@@ -342,6 +342,17 @@ class StrudelApp {
             this.strudelScheduler = scheduler;
             this.audioContext = ctx;
 
+            // Register node: prefix so samples() loads pack JSON from local sample-packs/ (no HTTP for map)
+            if (typeof registerSamplesPrefix === 'function' && window.electron?.readSamplePack) {
+                registerSamplesPrefix('node:', async (url) => {
+                    const name = url.replace(/^node:\/*/, '').trim() || 'dirt-samples';
+                    const result = await window.electron.readSamplePack(name);
+                    if (!result?.success || !result.json) throw new Error(result?.error || 'Failed to load sample pack');
+                    const json = result.json;
+                    return [json, json._base || ''];
+                });
+            }
+
             await this.initializeStrudelEditor();
             await this.loadDefaultSamplePacks();
             console.log('[StrudelApp] Strudel initialized with transpiler');
@@ -354,12 +365,12 @@ class StrudelApp {
 
     /**
      * Default sample packs to load so built-in sounds (bd, sd, hh, gtr, moog, etc.) work without adding samples() in user code.
-     * Use github:user/repo or a full URL to a strudel.json. GM sounds (gm_epiano1, gm_acoustic_bass) come from VCSL on
-     * strudel.cc; VCSL does not expose a public strudel.json, so we only load packs that do (e.g. dirt-samples).
+     * Use node:name to load from local src/views/strudel/sample-packs/name.json (no HTTP for map; audio still uses _base URL).
+     * Use github:user/repo to load from GitHub (HTTP).
      */
     static get DEFAULT_SAMPLE_PACKS() {
         return [
-            'github:tidalcycles/dirt-samples',
+            'node:dirt-samples',
         ];
     }
 
@@ -370,8 +381,12 @@ class StrudelApp {
     async loadDefaultSamplePacks() {
         if (!this.strudelEvaluate) return;
         const packs = this.constructor.DEFAULT_SAMPLE_PACKS;
-        for (const pack of packs) {
+        for (let pack of packs) {
             try {
+                // If node: pack but Electron readSamplePack not available (e.g. browser), fall back to GitHub
+                if (pack.startsWith('node:') && !(window.electron && typeof window.electron.readSamplePack === 'function')) {
+                    if (pack === 'node:dirt-samples') pack = 'github:tidalcycles/dirt-samples';
+                }
                 await this.strudelEvaluate(`await samples('${pack}');`, false);
                 console.log('[StrudelApp] Loaded default sample pack:', pack);
             } catch (e) {
