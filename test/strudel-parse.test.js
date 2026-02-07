@@ -9,6 +9,7 @@ const {
   parseCodeForPlay,
   getDollarBlocksWithSegments,
   mapPatternRangeToDoc,
+  normalizeCodeForParsing,
 } = require('../src/views/strudel/strudel-parse.cjs');
 
 function assert(condition, message) {
@@ -212,6 +213,73 @@ test('mapping chain: pattern range in block maps to correct doc slice', () => {
   const [docFrom, docTo] = mapPatternRangeToDoc(block.segments, patternFrom, patternTo);
   const slice = doc.slice(docFrom, docTo);
   assertEqual(slice, 'bd', 'doc slice at mapped range should be "bd"');
+});
+
+// --- normalizeCodeForParsing (for pallet CodeMirror highlighting) ---
+test('normalizeCodeForParsing: adds semicolon after samples()', () => {
+  const code = "samples('x')\nsetcps(0.5)";
+  const out = normalizeCodeForParsing(code);
+  assert(out.includes("samples('x');"), 'should add semicolon after samples()');
+  assert(out.includes('setcps(0.5);'), 'should add semicolon after setcps()');
+});
+
+test('normalizeCodeForParsing: no semicolon before continuation line starting with .', () => {
+  const code = 'stack(\n  s("bd")\n)';
+  const out = normalizeCodeForParsing(code);
+  assert(!out.includes('s("bd");'), 'should not add semicolon before closing paren');
+});
+
+test('normalizeCodeForParsing: no semicolon inside stack()', () => {
+  const code = [
+    "samples('github:eddyflux/crate')",
+    'setcps(.75)',
+    'stack( // DRUMS',
+    '    s("bd").struct("<[x*<1 2> [~@3 x]] x>"),',
+    '    s("~ [rim, sd:<2 3>]").room("<0 .2>"),',
+    '  ).bank(\'crate\')',
+  ].join('\n');
+  const out = normalizeCodeForParsing(code);
+  assert(out.includes("samples('github:eddyflux/crate');"), 'samples line should get semicolon');
+  assert(out.includes('setcps(.75);'), 'setcps line should get semicolon');
+  assert(!out.includes('DRUMS\');'), 'comment line should not get semicolon');
+  assert(!out.includes('x>"),;'), 'comma continuation should not get semicolon');
+});
+
+// --- Pallet CodeMirror highlighting: normalized code parses without syntax errors ---
+test('pallet highlighting: example with samples/setcps/stack parses without error nodes when normalized', () => {
+  const { parser } = require('@lezer/javascript');
+  const palletExampleCode = `samples('github:eddyflux/crate')
+setcps(.75)
+stack( // DRUMS
+    s("bd").struct("<[x*<1 2> [~@3 x]] x>"),
+    s("~ [rim, sd:<2 3>]").room("<0 .2>"),
+    n("[0 <1 3>]*<2!3 4>").s("hh"),
+    s("rd:<1!3 2>*2").gain(.5)
+  ).bank('crate')`;
+  const normalized = normalizeCodeForParsing(palletExampleCode);
+  const tree = parser.parse(normalized);
+  const errors = [];
+  tree.iterate({
+    enter: (node) => {
+      if (node.type.isError) {
+        errors.push({
+          from: node.from,
+          to: node.to,
+          name: node.type.name,
+        });
+      }
+    },
+  });
+  assertEqual(errors.length, 0, 'normalized pallet example should parse with no error nodes (got: ' + JSON.stringify(errors) + ')');
+});
+
+test('pallet highlighting: normalized code covers full document', () => {
+  const { parser } = require('@lezer/javascript');
+  const code = "samples('x')\nsetcps(0.5)\ns('bd')";
+  const normalized = normalizeCodeForParsing(code);
+  const tree = parser.parse(normalized);
+  const top = tree.topNode;
+  assert(top.from === 0 && top.to === normalized.length, 'syntax tree should span full document');
 });
 
 console.log('\n' + (failed === 0 ? 'All ' + passed + ' tests passed.' : passed + ' passed, ' + failed + ' failed.'));

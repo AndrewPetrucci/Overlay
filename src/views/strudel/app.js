@@ -7,6 +7,7 @@
 import * as strudelParse from './strudel-parse.cjs';
 import { initSettingsPanel as initSettingsPanelShared, DEFAULT_SETTINGS_FIELDS } from '../shared/settings-panel.js';
 import { DEFAULT_DOCUMENT_CONTENT } from './default-document-content.js';
+import { STRUDEL_DOCS } from './strudel-docs.js';
 
 /**
  * Open documents data structure.
@@ -22,188 +23,6 @@ function createDocument(id, filePath, name, content = '') {
         unsaved: false,
     };
 }
-
-/** Documentation for Strudel functions (name -> { summary, link? }). Links use hash (#name) so iframe scrolls to section. */
-const STRUDEL_DOCS = {
-    /* Samples: https://strudel.cc/learn/samples/ */
-    s: { summary: 'Sample: play a sample by name, e.g. s("bd"). Multiple names: s("bd sd").', link: 'https://strudel.cc/learn/samples/' },
-    fit: { summary: 'Makes the sample fit its event duration. Good for rhythmical loops like drum breaks.', link: 'https://strudel.cc/learn/samples/#fit' },
-    slice: { summary: 'Slice: chops samples into slices, triggered with a pattern. Use list of 0–1 for slice points.', link: 'https://strudel.cc/learn/samples/#slice' },
-    speed: { summary: 'Playback speed of sample (and pitch). e.g. .speed(1.5).', link: 'https://strudel.cc/learn/samples/#speed' },
-    begin: { summary: 'Skip the beginning of each sample (0–1).', link: 'https://strudel.cc/learn/samples/#begin' },
-    end: { summary: 'Cut off the end of each sample (0–1).', link: 'https://strudel.cc/learn/samples/#end' },
-    chop: { summary: 'Cut each sample into n parts (granular synthesis).', link: 'https://strudel.cc/learn/samples/#chop' },
-    clip: { summary: 'Multiply duration and cut samples that exceed it.', link: 'https://strudel.cc/learn/samples/#clip' },
-    loopAt: { summary: 'Fit the sample to n cycles by changing speed.', link: 'https://strudel.cc/learn/samples/#loopat' },
-    scrub: { summary: 'Scrub audio like a tape loop; position in file (0–1) and optional playback speed.', link: 'https://strudel.cc/learn/samples/#scrub' },
-    bank: { summary: 'Drum/sample bank: prepend a name to sample abbrevs, e.g. s("bd sd").bank("RolandTR808").', link: 'https://strudel.cc/learn/samples/#sound-banks' },
-    loop: { summary: 'Loop the sample (unsynced to cycle). Use loopBegin/loopEnd for region.', link: 'https://strudel.cc/learn/samples/#loop' },
-    loopBegin: { summary: 'Start of loop region (0–1). Use with loop(1).', link: 'https://strudel.cc/learn/samples/#loopbegin' },
-    loopEnd: { summary: 'End of loop region (0–1). Use with loop(1).', link: 'https://strudel.cc/learn/samples/#loopend' },
-    cut: { summary: 'Cut group: stop sample when another in same group plays (e.g. open/closed hi-hat).', link: 'https://strudel.cc/learn/samples/#cut' },
-    striate: { summary: 'Chop sample into n parts, trigger progressive portions each loop.', link: 'https://strudel.cc/learn/samples/#striate' },
-    splice: { summary: 'Like slice but changes speed of each slice to match step duration.', link: 'https://strudel.cc/learn/samples/#splice' },
-    samples: { summary: 'Load custom sample map (object or URL to strudel.json).', link: 'https://strudel.cc/learn/samples/#loading-custom-samples' },
-    soundAlias: { summary: 'Create alias for existing sound, e.g. soundAlias("RolandTR808_bd", "kick").', link: 'https://strudel.cc/learn/samples/#default-samples' },
-    setcps: { summary: 'Set tempo in cycles per second (e.g. setcps(0.75)). Default 0.5 = 2s per cycle.', link: 'https://strudel.cc/understand/cycles/' },
-    setcpm: { summary: 'Set tempo in cycles per minute. setcpm(x) = setcps(x/60). Use setcpm(bpm/bpc) for BPM.', link: 'https://strudel.cc/understand/cycles/' },
-    /* Notes: https://strudel.cc/learn/notes/ */
-    note: { summary: 'Pitch: note names (a3 c#4) or MIDI numbers (57 61 64).', link: 'https://strudel.cc/learn/notes/' },
-    n: { summary: 'Note: .n(0) or .note("c4"). Change pitch of a sample.', link: 'https://strudel.cc/learn/mini-notation/' },
-    freq: { summary: 'Pitch as frequency in Hz, e.g. freq("220 275 330 440").', link: 'https://strudel.cc/learn/notes/#freq' },
-    /* Tonal / chords: https://strudel.cc/learn/tonal/ */
-    chord: { summary: 'Chord symbols (e.g. C, Am, G7). Use with .voicing() and optionally .dict("ireal").', link: 'https://strudel.cc/understand/voicings/#what-is-a-chord' },
-    dict: { summary: 'Voicing dictionary for chord(), e.g. .dict("ireal"). Custom dicts via addVoicings().', link: 'https://strudel.cc/understand/voicings/#voicing-dictionaries' },
-    dictionary: { summary: 'Voicing dictionary for chord() (alias for dict), e.g. .dict("ireal").', link: 'https://strudel.cc/understand/voicings/#voicing-dictionaries' },
-    voicing: { summary: 'Turn chord symbols into voicings with optional anchor, mode, below, above, etc.', link: 'https://strudel.cc/learn/tonal/#voicing' },
-    scale: { summary: 'Scale: root and type (e.g. C:major). Turns numbers into scale notes or quantizes.', link: 'https://strudel.cc/learn/tonal/#scalename' },
-    transpose: { summary: 'Transpose all notes by semitones (number or interval notation).', link: 'https://strudel.cc/learn/tonal/#transposesemitones' },
-    scaleTranspose: { summary: 'Transpose notes within the scale by scale steps.', link: 'https://strudel.cc/learn/tonal/#scaletransposesteps' },
-    rootNotes: { summary: 'Chord symbols to root notes in given octave. Use with layer/struct/voicing.', link: 'https://strudel.cc/learn/tonal/#rootnotesoctave--2' },
-    anchor: { summary: 'Voicing: note to align voicings to (e.g. c5). Used with chord/voicing.', link: 'https://strudel.cc/understand/voicings/#anchor' },
-    mode: { summary: 'Voicing mode: below, above, duck, root. Used with chord/voicing.', link: 'https://strudel.cc/understand/voicings/#mode' },
-    set: { summary: 'Set pattern value from another (e.g. n("0 1 2").set(chords).voicing()).', link: 'https://strudel.cc/understand/voicings/#example' },
-    add: { summary: 'Add values to pattern (e.g. for transposing). Chainable.', link: 'https://strudel.cc/learn/conditional-modifiers/#struct' },
-    /* Audio effects: https://strudel.cc/learn/effects/ */
-    gain: { summary: 'Volume: multiply amplitude, e.g. .gain(.5).', link: 'https://strudel.cc/learn/effects/#gain' },
-    lpf: { summary: 'Low-pass filter: .lpf(2000).lpfq(4).', link: 'https://strudel.cc/learn/effects/#lpf' },
-    lpq: { summary: 'Low-pass filter Q (resonance): .lpq(4) or .lpfq(4).', link: 'https://strudel.cc/learn/effects/#lpq' },
-    hpf: { summary: 'High-pass filter.', link: 'https://strudel.cc/learn/effects/#hpf' },
-    bpf: { summary: 'Band-pass filter.', link: 'https://strudel.cc/learn/effects/#bpf' },
-    vowel: { summary: 'Vowel filter: .vowel("a e i o u").', link: 'https://strudel.cc/learn/effects/#vowel' },
-    pan: { summary: 'Stereo panning: .pan(sine) or .pan(.5).', link: 'https://strudel.cc/learn/effects/#pan' },
-    jux: { summary: 'Juxtapose: apply a function to the pattern and combine with original, e.g. .jux(rev).', link: 'https://strudel.cc/learn/effects/#jux' },
-    delay: { summary: 'Delay effect: .delay(.2).delaytime(.5).', link: 'https://strudel.cc/learn/effects/#delay' },
-    delaytime: { summary: 'Delay time in cycles or seconds.', link: 'https://strudel.cc/learn/effects/#delaytime' },
-    delayfeedback: { summary: 'Delay feedback amount (0–1). Caution: >= 1 can blow up.', link: 'https://strudel.cc/learn/effects/#delayfeedback' },
-    delayfb: { summary: 'Synonym for delayfeedback.', link: 'https://strudel.cc/learn/effects/#delayfeedback' },
-    room: { summary: 'Reverb level and size. .room(.8).roomsize(4).', link: 'https://strudel.cc/learn/effects/#room' },
-    roomsize: { summary: 'Reverb room size (0–10). Changing recalculates reverb.', link: 'https://strudel.cc/learn/effects/#roomsize' },
-    roomfade: { summary: 'Reverb fade time in seconds.', link: 'https://strudel.cc/learn/effects/#roomfade' },
-    roomlp: { summary: 'Reverb lowpass frequency in Hz.', link: 'https://strudel.cc/learn/effects/#roomlp' },
-    roomdim: { summary: 'Reverb lowpass frequency at -60dB (Hz).', link: 'https://strudel.cc/learn/effects/#roomdim' },
-    iresponse: { summary: 'Impulse response sample for reverb.', link: 'https://strudel.cc/learn/effects/#iresponse' },
-    reverb: { summary: 'Reverb effect (see room).', link: 'https://strudel.cc/learn/effects/#room' },
-    hpq: { summary: 'High-pass filter Q (resonance).', link: 'https://strudel.cc/learn/effects/#hpq' },
-    bpq: { summary: 'Band-pass filter Q (resonance).', link: 'https://strudel.cc/learn/effects/#bpq' },
-    ftype: { summary: 'Filter type: 12db (0), ladder (1), or 24db (2).', link: 'https://strudel.cc/learn/effects/#ftype' },
-    attack: { summary: 'Amplitude envelope attack time (seconds).', link: 'https://strudel.cc/learn/effects/#attack' },
-    att: { summary: 'Synonym for attack.', link: 'https://strudel.cc/learn/effects/#attack' },
-    decay: { summary: 'Amplitude envelope decay time (seconds).', link: 'https://strudel.cc/learn/effects/#decay' },
-    dec: { summary: 'Synonym for decay.', link: 'https://strudel.cc/learn/effects/#decay' },
-    sustain: { summary: 'Amplitude envelope sustain level (0–1).', link: 'https://strudel.cc/learn/effects/#sustain' },
-    sus: { summary: 'Synonym for sustain.', link: 'https://strudel.cc/learn/effects/#sustain' },
-    release: { summary: 'Amplitude envelope release time (seconds).', link: 'https://strudel.cc/learn/effects/#release' },
-    rel: { summary: 'Synonym for release.', link: 'https://strudel.cc/learn/effects/#release' },
-    adsr: { summary: 'ADSR envelope: attack, decay, sustain, release.', link: 'https://strudel.cc/learn/effects/#adsr' },
-    lpa: { summary: 'Lowpass filter envelope attack. Synonym: lpattack.', link: 'https://strudel.cc/learn/effects/#lpattack' },
-    lpattack: { summary: 'Lowpass filter envelope attack time.', link: 'https://strudel.cc/learn/effects/#lpattack' },
-    lpd: { summary: 'Lowpass filter envelope decay. Synonym: lpdecay.', link: 'https://strudel.cc/learn/effects/#lpdecay' },
-    lpdecay: { summary: 'Lowpass filter envelope decay time.', link: 'https://strudel.cc/learn/effects/#lpdecay' },
-    lps: { summary: 'Lowpass filter envelope sustain. Synonym: lpsustain.', link: 'https://strudel.cc/learn/effects/#lpsustain' },
-    lpsustain: { summary: 'Lowpass filter envelope sustain level.', link: 'https://strudel.cc/learn/effects/#lpsustain' },
-    lpr: { summary: 'Lowpass filter envelope release. Synonym: lprelease.', link: 'https://strudel.cc/learn/effects/#lprelease' },
-    lprelease: { summary: 'Lowpass filter envelope release time.', link: 'https://strudel.cc/learn/effects/#lprelease' },
-    lpenv: { summary: 'Lowpass filter envelope modulation depth.', link: 'https://strudel.cc/learn/effects/#lpenv' },
-    lpe: { summary: 'Synonym for lpenv.', link: 'https://strudel.cc/learn/effects/#lpenv' },
-    pattack: { summary: 'Pitch envelope attack time.', link: 'https://strudel.cc/learn/effects/#pattack' },
-    patt: { summary: 'Synonym for pattack.', link: 'https://strudel.cc/learn/effects/#pattack' },
-    pdecay: { summary: 'Pitch envelope decay time.', link: 'https://strudel.cc/learn/effects/#pdecay' },
-    pdec: { summary: 'Synonym for pdecay.', link: 'https://strudel.cc/learn/effects/#pdecay' },
-    prelease: { summary: 'Pitch envelope release time.', link: 'https://strudel.cc/learn/effects/#prelease' },
-    prel: { summary: 'Synonym for prelease.', link: 'https://strudel.cc/learn/effects/#prelease' },
-    /* Time modifiers: https://strudel.cc/learn/time-modifiers/ */
-    slow: { summary: 'Slow down a pattern over the given number of cycles. Like "/" in mini notation.', link: 'https://strudel.cc/learn/time-modifiers/#slow' },
-    fast: { summary: 'Speed up a pattern by the given factor. Used by "*" in mini notation.', link: 'https://strudel.cc/learn/time-modifiers/#fast' },
-    early: { summary: 'Nudge a pattern to start earlier in time. Like Tidal\'s <~ operator.', link: 'https://strudel.cc/learn/time-modifiers/#early' },
-    late: { summary: 'Nudge a pattern to start later in time. Like Tidal\'s ~> operator.', link: 'https://strudel.cc/learn/time-modifiers/#late' },
-    legato: { summary: 'Multiplies duration; cuts samples that exceed it. Synonym: clip.', link: 'https://strudel.cc/learn/time-modifiers/#clip' },
-    euclid: { summary: 'Euclidean rhythm: pulses over steps, e.g. .euclid(3,8).', link: 'https://strudel.cc/learn/time-modifiers/#euclid' },
-    euclidRot: { summary: 'Like euclid with rotation offset, e.g. .euclidRot(3,16,14).', link: 'https://strudel.cc/learn/time-modifiers/#euclidrot' },
-    euclidLegato: { summary: 'Euclidean rhythm with each pulse held until the next.', link: 'https://strudel.cc/learn/time-modifiers/#euclidlegato' },
-    rev: { summary: 'Reverse all cycles in a pattern.', link: 'https://strudel.cc/learn/time-modifiers/#rev' },
-    palindrome: { summary: 'Applies rev every other cycle (forwards then backwards).', link: 'https://strudel.cc/learn/time-modifiers/#palindrome' },
-    iter: { summary: 'Increments the starting subdivision each cycle, e.g. .iter(4).', link: 'https://strudel.cc/learn/time-modifiers/#iter' },
-    iterBack: { summary: 'Like iter but plays subdivisions in reverse order.', link: 'https://strudel.cc/learn/time-modifiers/#iterback' },
-    ply: { summary: 'Repeats each event the given number of times.', link: 'https://strudel.cc/learn/time-modifiers/#ply' },
-    segment: { summary: 'Samples the pattern at n events per cycle. Synonym: seg.', link: 'https://strudel.cc/learn/time-modifiers/#segment' },
-    seg: { summary: 'Samples the pattern at n events per cycle. Synonym: segment.', link: 'https://strudel.cc/learn/time-modifiers/#segment' },
-    compress: { summary: 'Compress each cycle into a timespan, leaving a gap.', link: 'https://strudel.cc/learn/time-modifiers/#compress' },
-    zoom: { summary: 'Plays a portion of a pattern by begin/end timespan.', link: 'https://strudel.cc/learn/time-modifiers/#zoom' },
-    linger: { summary: 'Selects a fraction of the pattern and repeats to fill the cycle.', link: 'https://strudel.cc/learn/time-modifiers/#linger' },
-    fastGap: { summary: 'Like fast but leaves a gap (pattern compressed into part of cycle).', link: 'https://strudel.cc/learn/time-modifiers/#fastgap' },
-    inside: { summary: 'Carries out an operation inside a cycle.', link: 'https://strudel.cc/learn/time-modifiers/#inside' },
-    outside: { summary: 'Carries out an operation outside a cycle.', link: 'https://strudel.cc/learn/time-modifiers/#outside' },
-    cpm: { summary: 'Plays the pattern at the given cycles per minute (tempo).', link: 'https://strudel.cc/learn/time-modifiers/#cpm' },
-    ribbon: { summary: 'Loops a portion of the pattern. Synonym: rib.', link: 'https://strudel.cc/learn/time-modifiers/#ribbon' },
-    rib: { summary: 'Loops a portion of the pattern. Synonym: ribbon.', link: 'https://strudel.cc/learn/time-modifiers/#ribbon' },
-    swingBy: { summary: 'Swing: delays events in second half of each slice by amount x.', link: 'https://strudel.cc/learn/time-modifiers/#swingby' },
-    swing: { summary: 'Shorthand for swingBy with 1/3, e.g. .swing(4).', link: 'https://strudel.cc/learn/time-modifiers/#swing' },
-    /* Creating patterns: https://strudel.cc/learn/factories */
-    cat: { summary: 'Concatenate: each item takes one cycle. Like "<x y>" in mini notation.', link: 'https://strudel.cc/learn/factories/#cat' },
-    slowcat: { summary: 'Synonym for cat.', link: 'https://strudel.cc/learn/factories/#cat' },
-    seq: { summary: 'Sequence: items crammed into one cycle. Like "x y" in mini notation.', link: 'https://strudel.cc/learn/factories/#seq' },
-    sequence: { summary: 'Synonym for seq.', link: 'https://strudel.cc/learn/factories/#seq' },
-    fastcat: { summary: 'Synonym for seq.', link: 'https://strudel.cc/learn/factories/#seq' },
-    stack: { summary: 'Play items at the same time. Like "x,y" in mini notation.', link: 'https://strudel.cc/learn/factories/#stack' },
-    stepcat: { summary: 'Concatenate proportional to steps per cycle. Like "x@3 y@2".', link: 'https://strudel.cc/learn/factories/#stepcat' },
-    timeCat: { summary: 'Synonym for stepcat.', link: 'https://strudel.cc/learn/factories/#stepcat' },
-    arrange: { summary: 'Arrange multiple patterns over cycles with [cycles, pattern] pairs.', link: 'https://strudel.cc/learn/factories/#arrange' },
-    polymeter: { summary: 'Align steps of patterns (polymeter). Synonym: pm.', link: 'https://strudel.cc/learn/factories/#polymeter' },
-    pm: { summary: 'Synonym for polymeter.', link: 'https://strudel.cc/learn/factories/#polymeter' },
-    polymeterSteps: { summary: 'Polymeter with step count. Like "{x y z}%2".', link: 'https://strudel.cc/learn/factories/#polymetersteps' },
-    silence: { summary: 'Does nothing. Like "~" in mini notation.', link: 'https://strudel.cc/learn/factories/#silence' },
-    run: { summary: 'Discrete pattern of numbers 0 to n-1.', link: 'https://strudel.cc/learn/factories/#run' },
-    binary: { summary: 'Creates a binary pattern from a number.', link: 'https://strudel.cc/learn/factories/#binary' },
-    binaryN: { summary: 'Binary pattern from a number, padded to n bits.', link: 'https://strudel.cc/learn/factories/#binaryn' },
-    /* Conditional modifiers: https://strudel.cc/learn/conditional-modifiers/ */
-    lastOf: { summary: 'Apply a function every n cycles, starting from the last cycle.', link: 'https://strudel.cc/learn/conditional-modifiers/#lastof' },
-    firstOf: { summary: 'Apply a function every n cycles, starting from the first cycle.', link: 'https://strudel.cc/learn/conditional-modifiers/#firstof' },
-    when: { summary: 'Apply a function when the given pattern is true.', link: 'https://strudel.cc/learn/conditional-modifiers/#when' },
-    chunk: { summary: 'Divide into parts, apply function to each part per cycle. Synonym: slowChunk.', link: 'https://strudel.cc/learn/conditional-modifiers/#chunk' },
-    chunkBack: { summary: 'Like chunk but cycles through parts in reverse.', link: 'https://strudel.cc/learn/conditional-modifiers/#chunkback' },
-    fastChunk: { summary: 'Like chunk but source cycles aren\'t repeated for each set.', link: 'https://strudel.cc/learn/conditional-modifiers/#fastchunk' },
-    arp: { summary: 'Select indices in stacked notes, e.g. .arp("0 [0,2] 1").', link: 'https://strudel.cc/learn/conditional-modifiers/#arp' },
-    arpWith: { summary: 'Select indices in stacked notes (function form).', link: 'https://strudel.cc/learn/conditional-modifiers/#arpwith' },
-    struct: { summary: 'Apply a structure pattern to another, e.g. .struct("x ~ x ~").', link: 'https://strudel.cc/learn/conditional-modifiers/#struct' },
-    mask: { summary: 'Returns silence when mask is 0 or "~".', link: 'https://strudel.cc/learn/conditional-modifiers/#mask' },
-    reset: { summary: 'Resets the pattern to the start of the cycle for each reset onset.', link: 'https://strudel.cc/learn/conditional-modifiers/#reset' },
-    restart: { summary: 'Restarts the pattern from cycle 0 for each restart onset.', link: 'https://strudel.cc/learn/conditional-modifiers/#restart' },
-    hush: { summary: 'Silences a pattern.', link: 'https://strudel.cc/learn/conditional-modifiers/#hush' },
-    invert: { summary: 'Swaps 1s and 0s in a binary pattern. Synonym: inv.', link: 'https://strudel.cc/learn/conditional-modifiers/#invert' },
-    inv: { summary: 'Synonym for invert.', link: 'https://strudel.cc/learn/conditional-modifiers/#invert' },
-    pick: { summary: 'Pick patterns from a list or lookup by index/name.', link: 'https://strudel.cc/learn/conditional-modifiers/#pick' },
-    pickmod: { summary: 'Like pick but index wraps around the list.', link: 'https://strudel.cc/learn/conditional-modifiers/#pickmod' },
-    pickF: { summary: 'Pick which function to apply from an array.', link: 'https://strudel.cc/learn/conditional-modifiers/#pickf' },
-    pickmodF: { summary: 'Like pickF but index wraps around.', link: 'https://strudel.cc/learn/conditional-modifiers/#pickmodf' },
-    pickRestart: { summary: 'Like pick but chosen pattern restarts when index is triggered.', link: 'https://strudel.cc/learn/conditional-modifiers/#pickrestart' },
-    pickmodRestart: { summary: 'Like pickRestart but index wraps.', link: 'https://strudel.cc/learn/conditional-modifiers/#pickmodrestart' },
-    pickReset: { summary: 'Like pick but chosen pattern resets when index is triggered.', link: 'https://strudel.cc/learn/conditional-modifiers/#pickreset' },
-    pickmodReset: { summary: 'Like pickReset but index wraps.', link: 'https://strudel.cc/learn/conditional-modifiers/#pickmodreset' },
-    inhabit: { summary: 'Like pick but cycles squeezed into the target pattern. Synonym: pickSqueeze.', link: 'https://strudel.cc/learn/conditional-modifiers/#inhabit' },
-    inhabitmod: { summary: 'Like inhabit but index wraps.', link: 'https://strudel.cc/learn/conditional-modifiers/#inhabitmod' },
-    squeeze: { summary: 'Pick from list via index; selected pattern compressed to event duration.', link: 'https://strudel.cc/learn/conditional-modifiers/#squeeze' },
-    /* Accumulation: https://strudel.cc/learn/accumulation/ */
-    superimpose: { summary: 'Superimpose the result of the given function(s) on top of the original pattern.', link: 'https://strudel.cc/learn/accumulation/#superimpose' },
-    layer: { summary: 'Layer the result of the given function(s) without the original. Synonym: apply.', link: 'https://strudel.cc/learn/accumulation/#layer' },
-    apply: { summary: 'Synonym for layer (accumulation).', link: 'https://strudel.cc/learn/accumulation/#layer' },
-    off: { summary: 'Superimpose the function result delayed by the given time.', link: 'https://strudel.cc/learn/accumulation/#off' },
-    echo: { summary: 'Superimpose and offset multiple times, decreasing velocity each time.', link: 'https://strudel.cc/learn/accumulation/#echo' },
-    echoWith: { summary: 'Like echo but apply a function each iteration. Synonym: stutWith.', link: 'https://strudel.cc/learn/accumulation/#echowith' },
-    stutWith: { summary: 'Synonym for echoWith.', link: 'https://strudel.cc/learn/accumulation/#echowith' },
-    stut: { summary: 'Deprecated. Like echo but last 2 params flipped.', link: 'https://strudel.cc/learn/accumulation/#stut' },
-    /* Pattern basics: https://strudel.cc/learn/pattern-basics/ */
-    /* Visual feedback: https://strudel.cc/learn/visual-feedback/ */
-    punchcard: { summary: 'Piano roll-style visual; includes transformations after. Use _punchcard() for inline.', link: 'https://strudel.cc/learn/visual-feedback/#punchcard' },
-    pianoroll: { summary: 'Piano roll render of the pattern (no subsequent transforms). Use _pianoroll() for inline.', link: 'https://strudel.cc/learn/visual-feedback/#pianoroll' },
-    spiral: { summary: 'Displays a spiral visual. Use _spiral() for inline. Options: stretch, size, thickness, etc.', link: 'https://strudel.cc/learn/visual-feedback/#spiral' },
-    scope: { summary: 'Oscilloscope for the time domain of the audio. Use _scope() for inline. Synonym: tscope.', link: 'https://strudel.cc/learn/visual-feedback/#scope' },
-    tscope: { summary: 'Synonym for scope.', link: 'https://strudel.cc/learn/visual-feedback/#scope' },
-    pitchwheel: { summary: 'Pitch circle to visualize frequencies within one octave. Use _pitchwheel() for inline.', link: 'https://strudel.cc/learn/visual-feedback/#pitchwheel' },
-    spectrum: { summary: 'Spectrum analyzer for the incoming audio. Use _spectrum() for inline.', link: 'https://strudel.cc/learn/visual-feedback/#spectrum' },
-    markcss: { summary: 'Override CSS of highlighted events, e.g. .markcss(\'text-decoration:underline\').', link: 'https://strudel.cc/learn/visual-feedback/#markcss' },
-    color: { summary: 'Color for mini notation highlighting and visuals, e.g. .color("cyan magenta").', link: 'https://strudel.cc/learn/visual-feedback/' },
-};
 
 /**
  * Get the identifier (word) at a given position in the CodeMirror document.
@@ -240,12 +59,12 @@ class StrudelApp {
         this._untitledCounter = 0;
         /** @type {{ tags: Array<{id:string, label?:string}>, examples: Array<{id?:string, label?:string, code?:string, tags?: string[]}> }} Loaded from pallet-tags.json */
         this.palletData = { tags: [], examples: [] };
-        /** @type {import('@codemirror/view').EditorView[]} Read-only CodeMirror views for palette examples; destroyed on re-render. */
+        /** @type {import('@codemirror/view').EditorView[]} Read-only CodeMirror views for pallet examples; destroyed on re-render. */
         this._palletExampleViews = [];
         this.initStrudel();
         this.initSaveLoadButtons();
         this.initSettingsPanel();
-        this.initDocsPaletteButtons();
+        this.initDocsPalletButtons();
         this.initPalletButtons();
     }
 
@@ -315,15 +134,14 @@ class StrudelApp {
                 afterEval: (options) => {
                     if (options.meta?.miniLocations == null) return;
                     if (self._playingFromPallet && self._playingPalletView) {
-                        self._applyPalletMiniLocationsAndMap(options.meta.miniLocations);
+                        // No highlighting in pallet CodeMirror on playback
                     } else if (self.cmView && self.strudelTranspiler) {
                         self._applyEditorMiniLocationsAndMap(options.meta.miniLocations);
                     }
                 },
                 onToggle: (started) => {
                     if (started) {
-                        if (self._playingFromPallet && self._playingPalletView) self.startPalletHighlightLoop();
-                        else if (!self._playingFromPallet) self.startHighlightLoop();
+                        if (!self._playingFromPallet) self.startHighlightLoop();
                     } else {
                         self.stopPalletHighlightLoop();
                         self._playingFromPallet = false;
@@ -686,36 +504,36 @@ class StrudelApp {
     }
 
     /**
-     * Initialize Docs / Palette toggle buttons in horrizontal-split: show one panel, hide the other; toggle button-depressed.
+     * Initialize Docs / Pallet toggle buttons in horrizontal-split: show one panel, hide the other; toggle button-depressed.
      */
-    initDocsPaletteButtons() {
+    initDocsPalletButtons() {
         const showDocsBtn = document.getElementById('showDocsBtn');
-        const showPaletteBtn = document.getElementById('showPaletteBtn');
+        const showPalletBtn = document.getElementById('showPalletBtn');
         const strudelDocs = document.getElementById('strudel-docs');
         const strudelPallet = document.getElementById('strudel-pallet');
 
-        if (!showDocsBtn || !showPaletteBtn || !strudelDocs || !strudelPallet) return;
+        if (!showDocsBtn || !showPalletBtn || !strudelDocs || !strudelPallet) return;
 
         function showDocs() {
             strudelDocs.removeAttribute('hidden');
             strudelPallet.setAttribute('hidden', '');
             showDocsBtn.classList.add('button-depressed');
-            showPaletteBtn.classList.remove('button-depressed');
+            showPalletBtn.classList.remove('button-depressed');
         }
 
-        function showPalette() {
+        function showPallet() {
             strudelPallet.removeAttribute('hidden');
             strudelDocs.setAttribute('hidden', '');
-            showPaletteBtn.classList.add('button-depressed');
+            showPalletBtn.classList.add('button-depressed');
             showDocsBtn.classList.remove('button-depressed');
         }
 
         showDocsBtn.addEventListener('click', showDocs);
-        showPaletteBtn.addEventListener('click', showPalette);
+        showPalletBtn.addEventListener('click', showPallet);
     }
 
     /**
-     * Load palette tags from pallet-tags.json and create pallet-btn elements. Click toggles button-depressed and refreshes examples.
+     * Load pallet tags from pallet-tags.json and create pallet-btn elements. Click toggles button-depressed and refreshes examples.
      */
     async initPalletButtons() {
         const container = document.querySelector('.pallet-button-container');
@@ -839,34 +657,68 @@ class StrudelApp {
     }
 
     /**
-     * Create a read-only CodeMirror view for palette example code (syntax highlighting only). Does not touch the main editor.
+     * Create a read-only CodeMirror view for pallet example code using the same process as the main editor
+     * (same extensions, theme, and language config from @strudel/codemirror) so syntax highlighting matches.
      * On failure falls back to a plain <pre>.
      * @param {HTMLElement} container - Element to mount the editor into (or fallback pre)
      * @param {string} code - Example code text
      */
     async createPalletExampleCodeMirror(container, code) {
         try {
-            const [stateMod, viewMod, langJs, langMod, strudelCm] = await Promise.all([
+            const [
+                strudelCm,
+                stateMod,
+                viewMod,
+                langJs,
+                langMod,
+                commandsMod,
+                autocompleteMod,
+            ] = await Promise.all([
+                import('@strudel/codemirror'),
                 import('@codemirror/state'),
                 import('@codemirror/view'),
                 import('@codemirror/lang-javascript'),
                 import('@codemirror/language'),
-                import('@strudel/codemirror').then((m) => m.highlightExtension).catch(() => null),
+                import('@codemirror/commands'),
+                import('@codemirror/autocomplete'),
             ]);
+            const settings = strudelCm.codemirrorSettings.get();
+            strudelCm.initTheme(settings.theme);
+            const initialSettings = Object.keys(strudelCm.compartments).map((key) =>
+                strudelCm.compartments[key].of(strudelCm.extensions[key](strudelCm.parseBooleans(settings[key]))),
+            );
             const { EditorState } = stateMod;
-            const { EditorView } = viewMod;
-            const { javascript } = langJs;
+            const { EditorView, highlightSpecialChars, dropCursor, rectangularSelection, crosshairCursor, keymap } = viewMod;
+            const { history, historyKeymap, defaultKeymap } = commandsMod;
+            const { closeBracketsKeymap } = autocompleteMod;
+            const { javascript, javascriptLanguage } = langJs;
             const { defaultHighlightStyle, syntaxHighlighting } = langMod;
-            const extensions = [
+            // Same basicSetup as main editor (from @strudel/codemirror basicSetup.mjs) so parsing/highlighting match
+            const basicSetupPallet = [
+                highlightSpecialChars(),
+                history(),
+                dropCursor(),
+                rectangularSelection(),
+                crosshairCursor(),
+                keymap.of([...closeBracketsKeymap, ...defaultKeymap, ...historyKeymap]),
+            ];
+            const palletExtensions = [
+                ...initialSettings,
+                ...basicSetupPallet,
                 javascript(),
+                javascriptLanguage.data.of({
+                    closeBrackets: { brackets: ['(', '[', '{', "'", '"', '<'] },
+                    bracketMatching: { brackets: ['(', '[', '{', "'", '"', '<'] },
+                }),
                 syntaxHighlighting(defaultHighlightStyle),
                 EditorView.editable.of(false),
                 EditorView.lineWrapping,
             ];
-            if (Array.isArray(strudelCm)) extensions.push(...strudelCm);
+            if (Array.isArray(strudelCm.highlightExtension)) palletExtensions.push(...strudelCm.highlightExtension);
+            const normalizedCode = strudelParse.normalizeCodeForParsing(code);
             const state = EditorState.create({
-                doc: code,
-                extensions,
+                doc: normalizedCode,
+                extensions: palletExtensions,
             });
             const view = new EditorView({
                 state,
@@ -874,7 +726,7 @@ class StrudelApp {
             });
             (this._palletExampleViews = this._palletExampleViews || []).push(view);
         } catch (e) {
-            console.warn('[StrudelApp] Palette example CodeMirror failed, using plain pre:', e?.message || e);
+            console.warn('[StrudelApp] Pallet example CodeMirror failed, using plain pre:', e?.message || e);
             container.innerHTML = '';
             const pre = document.createElement('pre');
             pre.className = 'pallet-example-code';
@@ -885,9 +737,9 @@ class StrudelApp {
 
     /**
      * Play a single example code snippet programmatically (does not use or change the editor).
-     * Plays one cycle then stops. When palletViewIndex >= 0, highlighting is applied to that pallet example's CodeMirror.
+     * Plays one cycle then stops. No playback highlighting in the pallet CodeMirror.
      * @param {string} code - Example code to play
-     * @param {number} [palletViewIndex] - Index into _palletExampleViews for the example being played (-1 or omitted = no pallet highlighting)
+     * @param {number} [palletViewIndex] - Index into _palletExampleViews for the example being played (unused; kept for API)
      */
     async playExampleCode(code, palletViewIndex) {
         if (!code || !code.trim()) return;
@@ -1731,9 +1583,7 @@ class StrudelApp {
     }
 
     /**
-     * Map codeToEval mini locations to the currently playing pallet view's document and apply them.
-     * Used when playing from the pallet so highlighting appears on that example's CodeMirror.
-     * Sets _playCodeToPalletMap for the pallet highlight loop.
+     * Map codeToEval mini locations to the currently playing pallet view's document (unused; pallet has no playback highlighting).
      */
     _applyPalletMiniLocationsAndMap(playCodeMiniLocations) {
         if (!this._playingPalletView) return;
@@ -2006,7 +1856,7 @@ class StrudelApp {
     /**
      * Play/evaluate Strudel code. If codeToPlay is provided, uses it; otherwise uses the editor content.
      * Pattern lines are executed as a single stack; setup lines run in the same scope.
-     * @param {string|null|undefined} [codeToPlay] - Optional code string to play (e.g. palette example). When omitted, uses editor content.
+     * @param {string|null|undefined} [codeToPlay] - Optional code string to play (e.g. pallet example). When omitted, uses editor content.
      * @param {number|undefined} [cycles] - If a positive number, stop playback after this many cycles (default cycle = 2s). If undefined, play until stopped.
      */
     async playStrudelContent(codeToPlay, cycles) {
@@ -2016,7 +1866,8 @@ class StrudelApp {
             this._cycleStopTimeoutId = null;
         }
         try {
-            const code = codeToPlay != null ? codeToPlay : this.getEditorContent();
+            const rawCode = codeToPlay != null ? codeToPlay : this.getEditorContent();
+            const code = codeToPlay != null ? strudelParse.normalizeCodeForParsing(rawCode) : rawCode;
             if (code === null) {
                 console.warn('[StrudelApp] No editor found');
                 return;
@@ -2078,8 +1929,9 @@ class StrudelApp {
                 if (this.strudelEvaluate) {
                     try {
                         const playCode = this.buildStackPlayCodeFromDollarLines(dollarLines);
+                        const playCodeForReturn = playCode.replace(/;\s*$/, '');
                         let codeToEval = setupCode
-                            ? `(async function(){ ${setupCode};\nreturn (${playCode}); })()`
+                            ? `(async function(){ ${setupCode};\nreturn (${playCodeForReturn}); })()`
                             : playCode;
                         codeToEval = this.substituteGMWithBuiltinSynths(codeToEval);
                         const playCodeStart = codeToEval.indexOf("return (") + "return (".length;

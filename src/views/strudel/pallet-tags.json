@@ -9,6 +9,7 @@
   "examples": [
     { "id": "dumb1", "label": "Single Drum", "code": "sound(\"bd\")", "tags": ["sounds", "drum"] },
     { "id": "dumb2", "label": "Drumb Sequence", "code": "sound(\"bd hh sd oh\")", "tags": ["sounds", "patterns", "drum"] },
-    { "id": "dumbBank1", "label": "Drumb Sequence w/ Bank", "code": "sound(\"bd hh sd oh\").bank(\"RolandTR909\")", "tags": ["sounds", "patterns", "drum", "utility"] }
+    { "id": "dumbBank1", "label": "Drumb Sequence w/ Bank", "code": "sound(\"bd hh sd oh\").bank(\"RolandTR909\")", "tags": ["sounds", "patterns", "drum", "utility"] },
+    { "id": "dumbStack1", "label": "Drumb Sequence Stack", "code": "samples('github:eddyflux/crate')\nsetcps(.75)\nstack( // DRUMS\n    s(\"bd\").struct(\"<[x*<1 2> [~@3 x]] x>\"),\n    s(\"~ [rim, sd:<2 3>]\").room(\"<0 .2>\"),\n    n(\"[0 <1 3>]*<2!3 4>\").s(\"hh\"),\n    s(\"rd:<1!3 2>*2\").gain(.5)\n  ).bank('crate')", "tags": ["sounds", "patterns", "drum", "utility", "fx"] }
   ]
 }

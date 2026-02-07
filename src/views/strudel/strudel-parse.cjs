@@ -180,9 +180,92 @@ function mapPatternRangeToDoc(segments, from, to) {
   return [docFrom, docTo];
 }
 
+/**
+ * Get bracket/brace depth at position (excluding strings and comments).
+ * Returns { parens, brackets, braces }.
+ */
+function getDepthAt(code, pos) {
+  let parens = 0;
+  let brackets = 0;
+  let braces = 0;
+  let i = 0;
+  const len = Math.min(pos, code.length);
+  while (i < len) {
+    const ch = code[i];
+    if (ch === '"' || ch === "'" || ch === '`') {
+      const q = ch;
+      i++;
+      while (i < len && code[i] !== q) {
+        if (code[i] === '\\') i++;
+        i++;
+      }
+      if (i < len) i++;
+      continue;
+    }
+    if (ch === '/' && code[i + 1] === '/') {
+      i += 2;
+      while (i < len && code[i] !== '\n') i++;
+      continue;
+    }
+    if (ch === '/' && code[i + 1] === '*') {
+      i += 2;
+      while (i < len - 1 && !(code[i] === '*' && code[i + 1] === '/')) i++;
+      i += 2;
+      continue;
+    }
+    if (ch === '(') parens++;
+    else if (ch === ')') parens--;
+    else if (ch === '[') brackets++;
+    else if (ch === ']') brackets--;
+    else if (ch === '{') braces++;
+    else if (ch === '}') braces--;
+    i++;
+  }
+  return { parens, brackets, braces };
+}
+
+/**
+ * Normalize Strudel code for CodeMirror so the JavaScript parser sees clear statement boundaries.
+ * Inserts semicolons after lines that end an expression when the next line starts a new statement.
+ * Use this before passing pallet (or any) code to CodeMirror so syntax highlighting works with
+ * samples(), setcps(), and multi-line stack() etc.
+ * @param {string} code
+ * @returns {string}
+ */
+function normalizeCodeForParsing(code) {
+  if (!code || typeof code !== 'string') return code;
+  const lines = code.split('\n');
+  const result = [];
+  for (let i = 0; i < lines.length; i++) {
+    result.push(lines[i]);
+    const line = lines[i];
+    const trimmed = line.trim();
+    if (!trimmed) continue;
+    const lastChar = trimmed.slice(-1);
+    if (lastChar !== ')' && lastChar !== ']') continue;
+    const codeSoFar = lines.slice(0, i + 1).join('\n');
+    const depth = getDepthAt(codeSoFar, codeSoFar.length);
+    if (depth.parens !== 0 || depth.brackets !== 0 || depth.braces !== 0) continue;
+    let nextNonEmpty = i + 1;
+    while (nextNonEmpty < lines.length) {
+      const t = lines[nextNonEmpty].trim();
+      if (t && !t.startsWith('//')) break;
+      nextNonEmpty++;
+    }
+    if (nextNonEmpty < lines.length) {
+      const nextTrimmed = lines[nextNonEmpty].trim();
+      const nextStart = nextTrimmed[0];
+      if (nextStart === '.' || nextStart === ',' || nextStart === ')' || nextStart === ']') continue;
+    }
+    result[result.length - 1] = line + ';';
+  }
+  return result.join('\n');
+}
+
 module.exports = {
   isSetupOnlyLine,
   parseCodeForPlay,
   getDollarBlocksWithSegments,
   mapPatternRangeToDoc,
+  normalizeCodeForParsing,
 };
