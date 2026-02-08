@@ -1,0 +1,5 @@
+samples('github:eddyflux/crate')
+
+stack(
+  sound("<bd bd hh bd rim bd hh bd>*8").bank("crate")
+)

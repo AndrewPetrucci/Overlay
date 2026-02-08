@@ -84,7 +84,7 @@ class StrudelApp {
             if (typeof setTime === 'function') setTime(() => 0);
             const { transpiler } = strudelTranspiler;
             this.strudelTranspiler = transpiler;
-            const { getAudioContext, webaudioOutput, initAudioOnFirstClick, registerSynthSounds, registerSamplesPrefix } = strudelWebaudio;
+            const { getAudioContext, webaudioOutput, initAudioOnFirstClick, registerSynthSounds, registerSamplesPrefix, renderPatternAudio } = strudelWebaudio;
 
             // Initialize audio context
             const ctx = getAudioContext();
@@ -129,7 +129,7 @@ class StrudelApp {
             const self = this;
             const { evaluate, stop, scheduler } = repl({
                 defaultOutput: webaudioOutput,
-                getTime: () => ctx.currentTime,
+                getTime: () => getAudioContext().currentTime,
                 transpiler,
                 afterEval: (options) => {
                     if (options.meta?.miniLocations == null) return;
@@ -155,11 +155,12 @@ class StrudelApp {
                 },
             });
 
-            // Store evaluate, stop, and scheduler for later use
+            // Store evaluate, stop, scheduler, and renderPatternAudio for later use
             this.strudelEvaluate = evaluate;
             this.strudelStop = stop;
             this.strudelScheduler = scheduler;
             this.audioContext = ctx;
+            this.renderPatternAudio = renderPatternAudio;
 
             // Register node: prefix so samples() loads pack JSON from local sample-packs/ (no HTTP for map)
             if (typeof registerSamplesPrefix === 'function' && window.electron?.readSamplePack) {
@@ -489,6 +490,15 @@ class StrudelApp {
         const newBtn = document.getElementById('newBtn');
         if (newBtn) {
             newBtn.addEventListener('click', () => this.openNewUntitled());
+        }
+
+        const exportWavBtn = document.getElementById('exportWavBtn');
+        const exportCyclesInput = document.getElementById('strudelExportCycles');
+        if (exportWavBtn) {
+            exportWavBtn.addEventListener('click', () => {
+                const cycles = exportCyclesInput ? Math.max(1, Math.min(999, parseInt(exportCyclesInput.value, 10) || 4)) : 4;
+                this.exportStrudelToWav(cycles);
+            });
         }
 
         // Start with one untitled document if none (restoreOpenFiles may have already loaded persisted files)
@@ -2393,6 +2403,85 @@ class StrudelApp {
     }
 
     /**
+     * Export the current editor content as a WAV file by offline-rendering a given number of cycles.
+     * Uses @strudel/webaudio renderPatternAudio; after export, the live audio context is restored so playback still works.
+     * @param {number} cycles - Number of cycles to render (default cycle length from setcps in code, or 2s at 0.5 cps).
+     * @param {string} [downloadName] - Base name for the downloaded file (without .wav). Default: strudel-export with timestamp.
+     */
+    async exportStrudelToWav(cycles, downloadName) {
+        if (!this.strudelEvaluate || !this.strudelScheduler) {
+            alert('Strudel is not initialized. Wait for it to load and try again.');
+            return;
+        }
+        if (!this.renderPatternAudio) {
+            alert('Audio export is not available (renderPatternAudio not loaded).');
+            return;
+        }
+        const code = this.getEditorContent();
+        if (code === null || !code.trim()) {
+            alert('No code to export. Add some pattern lines (lines starting with $) and try again.');
+            return;
+        }
+        const { dollarLines, otherLines } = this.parseCodeForPlay(code);
+        if (dollarLines.length === 0) {
+            alert('No pattern lines found. Add lines starting with $ and try again.');
+            return;
+        }
+        const setupLines = otherLines
+            .map((line) => line.trim())
+            .filter((trimmed) => trimmed && !trimmed.startsWith('//'));
+        let setupCode = setupLines.join(';\n');
+        if (!/\bsetcps\s*\(/i.test(setupCode)) {
+            setupCode = setupCode ? `setcps(0.5);\n${setupCode}` : 'setcps(0.5)';
+        }
+        const playCode = this.buildStackPlayCodeFromDollarLines(dollarLines);
+        const playCodeForReturn = playCode.replace(/;\s*$/, '');
+        let codeToEval = setupCode
+            ? `(async function(){ ${setupCode};\nreturn (${playCodeForReturn}); })()`
+            : playCode;
+        codeToEval = this.substituteGMWithBuiltinSynths(codeToEval);
+
+        try {
+            const pattern = await this.strudelEvaluate(codeToEval, false);
+            if (!pattern || !pattern._Pattern) {
+                alert('Could not get a valid pattern from the code. Check the code and try again.');
+                return;
+            }
+            const cps = typeof this.strudelScheduler.cps === 'number' ? this.strudelScheduler.cps : 0.5;
+            const sampleRate = 44100;
+            const maxPolyphony = 128;
+            const multiChannelOrbits = false;
+            const name = downloadName || `strudel-export-${Date.now()}`;
+
+            await this.renderPatternAudio(
+                pattern,
+                cps,
+                0,
+                cycles,
+                sampleRate,
+                maxPolyphony,
+                multiChannelOrbits,
+                name
+            );
+
+            // Restore live audio context so playback works again (renderPatternAudio closes it and sets global to null)
+            try {
+                const superdough = await import('superdough');
+                if (superdough.setAudioContext && superdough.initAudio) {
+                    const newCtx = new (window.AudioContext || window.webkitAudioContext)();
+                    superdough.setAudioContext(newCtx);
+                    await superdough.initAudio({ maxPolyphony, multiChannelOrbits });
+                }
+            } catch (restoreErr) {
+                console.warn('[StrudelApp] Could not restore audio context after export:', restoreErr);
+            }
+        } catch (error) {
+            console.error('[StrudelApp] Export error:', error);
+            alert('Export failed: ' + (error.message || String(error)));
+        }
+    }
+
+    /**
      * Start the requestAnimationFrame loop that highlights active pattern tags in CodeMirror.
      * Uses the Strudel REPL's implementation: @strudel/codemirror highlightMiniLocations(view, atTime, haps).
      * We pass haps with context.locations in document space (mapped via _playCodeToEditorMap) so the
@@ -2435,6 +2524,7 @@ class StrudelApp {
                     highlightMiniLocations(this.cmView, time, hapsWithDocLocations);
                 });
             }
+            this._updateCycleDisplay(time);
             this._highlightRAF = requestAnimationFrame(loop);
         };
         this._highlightRAF = requestAnimationFrame(loop);
@@ -2449,12 +2539,32 @@ class StrudelApp {
             cancelAnimationFrame(this._highlightRAF);
             this._highlightRAF = null;
         }
+        this._updateCycleDisplay(null);
         if (this.cmView) {
             import('@strudel/codemirror').then(({ updateMiniLocations, highlightMiniLocations }) => {
                 updateMiniLocations(this.cmView, []);
                 highlightMiniLocations(this.cmView, 0, []);
             });
         }
+    }
+
+    /**
+     * Update the toolbar cycle indicator. Call with current scheduler time when playing, or null when stopped.
+     * @param {number|null} time - scheduler.now() while playing, or null to clear/hide.
+     */
+    _updateCycleDisplay(time) {
+        const el = document.getElementById('strudelCycleDisplay');
+        if (!el) return;
+        if (time == null || !this.strudelScheduler?.started) {
+            el.textContent = '';
+            el.classList.remove('strudel-cycle-display-visible');
+            return;
+        }
+        const cps = typeof this.strudelScheduler.cps === 'number' ? this.strudelScheduler.cps : 0.5;
+        const cycle = time * cps;
+        const cycleNum = Math.floor(cycle) + 1;
+        el.textContent = `Cycle ${cycleNum}`;
+        el.classList.add('strudel-cycle-display-visible');
     }
 
     /**
@@ -2491,6 +2601,7 @@ class StrudelApp {
                 if (newLocs.length === 0) return null;
                 return { ...hap, context: { ...hap.context, locations: newLocs } };
             }).filter(Boolean) : activeHaps;
+            this._updateCycleDisplay(time);
             const view = this._playingPalletView;
             if (view) {
                 if (highlightMiniLocationsFn) {

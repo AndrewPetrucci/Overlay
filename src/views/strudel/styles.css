@@ -396,6 +396,71 @@
     display: block;
 }
 
+.strudel-cycle-display {
+    font-size: 12px;
+    color: rgba(255, 255, 255, 0.7);
+    padding: 0 8px;
+    min-width: 0;
+    -webkit-app-region: no-drag;
+}
+
+.strudel-cycle-display:not(.strudel-cycle-display-visible) {
+    display: none;
+}
+
+.strudel-cycle-display.strudel-cycle-display-visible {
+    display: inline-block;
+}
+
+.strudel-export-sep {
+    color: rgba(255, 255, 255, 0.35);
+    margin: 0 2px;
+    font-size: 12px;
+}
+
+.strudel-export-label {
+    font-size: 11px;
+    color: rgba(255, 255, 255, 0.8);
+    margin-right: 4px;
+    -webkit-app-region: no-drag;
+}
+
+.strudel-export-cycles {
+    width: 42px;
+    padding: 2px 4px;
+    font-size: 12px;
+    font-family: inherit;
+    color: #b8c5ff;
+    background: rgba(0, 0, 0, 0.35);
+    border: 1px solid rgba(255, 255, 255, 0.25);
+    border-radius: 4px;
+    -webkit-app-region: no-drag;
+}
+
+.strudel-export-cycles:focus {
+    outline: none;
+    border-color: rgba(255, 255, 255, 0.5);
+}
+
+.strudel-tool-btn.export-wav-btn {
+    min-width: auto;
+    padding: 4px 8px;
+    gap: 4px;
+    display: inline-flex;
+    align-items: center;
+    flex-direction: row;
+}
+
+.strudel-tool-btn.export-wav-btn .strudel-tool-icon {
+    width: 14px;
+    height: 14px;
+}
+
+.strudel-export-wav-text {
+    font-size: 11px;
+    white-space: nowrap;
+}
+
 /* Settings button and panel (window width/height) */
 .window-bar-right {
     position: relative;
